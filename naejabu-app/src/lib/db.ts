@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 
-const dbPath = path.join(process.cwd(), 'naejabu-app', 'db.sqlite');
+const dbPath = path.join(process.cwd(), 'db.sqlite');
 
 const db = new Database(dbPath, { verbose: console.log });
 

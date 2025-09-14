@@ -94,6 +94,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         // Fetch the updated resume to return it
         const resumeStmt = db.prepare('SELECT * FROM resumes WHERE id = ?');
         const resume = resumeStmt.get(resumeId);
+
+        if (!resume) {
+            return NextResponse.json({ message: 'Resume not found' }, { status: 404 });
+        }
+
         const questionsStmt = db.prepare('SELECT * FROM resume_questions WHERE resume_id = ?');
         const updatedQuestions = questionsStmt.all(resumeId);
 

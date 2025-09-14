@@ -69,3 +69,32 @@ export const sendVerificationEmail = async (email: string, token: string) => {
 
   return await sendMail(mailOptions);
 };
+
+// 4. Create a specific function for sending the verification code email
+export const sendVerificationCodeEmail = async (email: string, code: string) => {
+  const mailOptions: MailOptions = {
+    to: email,
+    subject: '[내자부] 회원가입 인증 코드 안내',
+    html: `
+      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 40px auto; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+        <div style="background-color: #4A90E2; color: #ffffff; padding: 20px 30px;">
+          <h1 style="margin: 0; font-size: 24px;">내자부 이메일 인증</h1>
+        </div>
+        <div style="padding: 30px 30px 40px 30px; color: #333333;">
+          <h2 style="font-size: 20px; margin-top: 0; margin-bottom: 20px;">인증 코드를 확인해주세요.</h2>
+          <p style="margin-bottom: 25px; font-size: 16px; line-height: 1.6;">안녕하세요! 내자부 회원가입을 계속하려면 아래 인증 코드를 입력해주세요.</p>
+          <div style="background-color: #f5f5f5; border-radius: 4px; text-align: center; padding: 20px;">
+            <p style="font-size: 32px; font-weight: bold; letter-spacing: 4px; margin: 0; color: #4A90E2;">${code}</p>
+          </div>
+          <p style="margin-top: 25px; font-size: 14px; color: #888888;">이 인증 코드는 10분 동안 유효합니다.</p>
+        </div>
+        <div style="background-color: #f5f5f5; padding: 20px 30px; text-align: center; font-size: 12px; color: #888888;">
+          <p style="margin: 0;">본인이 요청하지 않은 경우 이 이메일을 무시해 주세요.</p>
+          <p style="margin: 5px 0 0 0;">&copy; 2025 내자부. All Rights Reserved.</p>
+        </div>
+      </div>
+    `,
+  };
+
+  return await sendMail(mailOptions);
+};

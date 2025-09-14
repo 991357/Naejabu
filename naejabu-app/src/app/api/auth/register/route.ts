@@ -9,6 +9,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'All fields are required' }, { status: 400 });
   }
 
+  if (email !== 'admin') {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ message: 'Invalid email format' }, { status: 400 });
+    }
+  }
+
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -33,7 +40,7 @@ export async function POST(req: NextRequest) {
 
     console.error('Registration Error:', error);
     return NextResponse.json(
-      { message: 'An error occurred during registration.' },
+      { message: error.message || 'An error occurred during registration.' },
       { status: 500 }
     );
   }

@@ -10,22 +10,29 @@ import ListView from '../../components/ListView';
 import CalendarView from '../../components/CalendarView';
 import { FaTh, FaList, FaCalendarAlt } from 'react-icons/fa';
 
-const getAuthHeaders = () => {
+interface Resume {
+  id: string;
+  company_name: string;
+  deadline: string;
+  updated_at: string;
+  created_at: string;
+}
+
+
+const getAuthHeaders = (): HeadersInit => {
     const token = localStorage.getItem('token');
-    if (token && token !== 'null') {
-        return {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-        };
-    }
-    return {
+    const headers: HeadersInit = {
         'Content-Type': 'application/json',
     };
+    if (token && token !== 'null') {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
 };
 
 const ResumesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [resumes, setResumes] = useState([]);
+  const [resumes, setResumes] = useState<Resume[]>([]);
   const [view, setView] = useState(() => {
     if (typeof window !== 'undefined') {
       const savedView = localStorage.getItem('resumeViewType');
