@@ -8,6 +8,7 @@ import withAuth from '../../components/withAuth';
 import GridView from '../../components/GridView';
 import ListView from '../../components/ListView';
 import CalendarView from '../../components/CalendarView';
+import PasswordChangePopup from '../../components/PasswordChangePopup'; // Import the new popup component
 import { FaTh, FaList, FaCalendarAlt } from 'react-icons/fa';
 
 interface Resume {
@@ -18,6 +19,10 @@ interface Resume {
   created_at: string;
 }
 
+interface User {
+    id: number;
+    is_temp_password?: number; // Add this field to the user interface
+}
 
 const getAuthHeaders = (): HeadersInit => {
     const token = localStorage.getItem('token');
@@ -33,6 +38,7 @@ const getAuthHeaders = (): HeadersInit => {
 const ResumesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [resumes, setResumes] = useState<Resume[]>([]);
+  const [showPasswordPopup, setShowPasswordPopup] = useState(false);
   const [view, setView] = useState(() => {
     if (typeof window !== 'undefined') {
       const savedView = localStorage.getItem('resumeViewType');
@@ -53,20 +59,35 @@ const ResumesPage = () => {
     const response = await fetch('/api/resumes', { headers: getAuthHeaders() });
     if (response.ok) {
       const data = await response.json();
-      // Ensure data is an array before setting it
       if (Array.isArray(data)) {
         setResumes(data);
       } else {
         console.error('Fetched data is not an array:', data);
-        setResumes([]); // Set to empty array to prevent crash
+        setResumes([]);
       }
     } else {
       console.error('Failed to fetch resumes:', response.statusText);
-      setResumes([]); // Set to empty array on error
+      setResumes([]);
     }
   };
 
+  // Effect to check user status for temp password
   useEffect(() => {
+    const checkUserStatus = async () => {
+        try {
+            const response = await fetch('/api/auth/me', { headers: getAuthHeaders() });
+            if (response.ok) {
+                const userData: User = await response.json();
+                if (userData.is_temp_password === 1) {
+                    setShowPasswordPopup(true);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to fetch user status', error);
+        }
+    };
+
+    checkUserStatus();
     fetchResumes();
   }, []);
 
@@ -152,6 +173,8 @@ const ResumesPage = () => {
         <div>{renderView()}</div>
 
       </main>
+
+      {showPasswordPopup && <PasswordChangePopup onClose={() => setShowPasswordPopup(false)} />}
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <CreateResumeModal

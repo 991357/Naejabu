@@ -3,37 +3,48 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useLoading } from '../../context/LoadingContext'; // Import useLoading
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const { isLoading, setIsLoading } = useLoading(); // Use global loading state
   const router = useRouter();
 
   const handleLogin = async () => {
     setError('');
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    setIsLoading(true); // Start loading
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-      localStorage.setItem('token', data.token);
-      router.push('/resumes');
-    } else {
-      setError(data.message || 'An error occurred');
+      if (response.ok) {
+        localStorage.setItem('token', data.token);
+        router.push('/resumes');
+      } else {
+        setError(data.message || 'An error occurred');
+      }
+    } catch (err) {
+        setError('An unexpected error occurred. Please try again.');
+    } finally {
+        setIsLoading(false); // Stop loading
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center relative">
+    <div className="min-h-screen flex flex-col justify-center items-center relative bg-gray-100">
       <div className="absolute top-8 left-8">
-        <Link href="/" className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors">
+        <Link href="/" className="bg-white hover:bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors shadow-sm">
             홈으로
         </Link>
       </div>
@@ -51,38 +62,59 @@ const LoginPage = () => {
             placeholder="email@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled={isLoading}
           />
         </div>
         <div className="mb-6">
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
             비밀번호
           </label>
-          <input
-            className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 mb-3 leading-tight focus:outline-none focus:ring-2 focus:ring-accent"
-            id="password"
-            type="password"
-            placeholder="******************"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                handleLogin();
-              }
-            }}
-          />
+          <div className="relative">
+            <input
+              className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-accent pr-10"
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="******************"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleLogin();
+                }
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700 disabled:cursor-not-allowed"
+              disabled={isLoading}
+            >
+              {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+            </button>
+          </div>
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
           <button
-            className="bg-accent hover:bg-opacity-80 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
+            className="bg-accent hover:bg-opacity-80 text-white font-bold py-3 px-5 rounded focus:outline-none focus:shadow-outline w-full disabled:bg-gray-400"
             type="button"
             onClick={handleLogin}
+            disabled={isLoading}
           >
-            로그인
+            {isLoading ? '로그인 중...' : '로그인'}
           </button>
         </div>
-        <div className="text-center mt-4">
-          <Link href="/register" className="inline-block align-baseline font-bold text-sm text-accent hover:text-opacity-80">
-            회원이 아니신가요?
+        <div className="text-center">
+          <Link href="/register" className="inline-block align-baseline font-bold text-sm text-accent hover:text-opacity-80 mr-4">
+            회원가입
+          </Link>
+          <span className="text-gray-400">|</span>
+          <Link href="/find-id" className="inline-block align-baseline font-bold text-sm text-gray-600 hover:text-accent ml-4 mr-4">
+            아이디 찾기
+          </Link>
+          <span className="text-gray-400">|</span>
+          <Link href="/find-password" className="inline-block align-baseline font-bold text-sm text-gray-600 hover:text-accent ml-4">
+            비밀번호 찾기
           </Link>
         </div>
       </div>

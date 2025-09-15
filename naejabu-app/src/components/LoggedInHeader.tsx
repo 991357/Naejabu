@@ -36,6 +36,9 @@ const LoggedInHeader: React.FC<LoggedInHeaderProps> = ({ onNavigate }) => {
           <button onClick={() => handleLinkClick('/feedback')} className="hover:text-gray-300">
             첨삭 받기
           </button>
+          <button onClick={() => handleLinkClick('/trash')} className="hover:text-gray-300">
+            휴지통
+          </button>
           <button onClick={() => handleLinkClick('/mypage')} className="bg-accent text-white font-bold py-2 px-4 rounded hover:bg-opacity-80">
             마이페이지
           </button>

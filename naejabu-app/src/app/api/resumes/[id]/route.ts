@@ -114,7 +114,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 }
 
 
-// DELETE /api/resumes/[id] - Delete a resume
+// DELETE /api/resumes/[id] - Soft delete a resume
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
     try {
         const userId = getUserIdFromToken(req);
@@ -123,9 +123,12 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
         }
 
         const resumeId = parseInt(params.id, 10);
+        const now = new Date().toISOString();
 
-        const stmt = db.prepare('DELETE FROM resumes WHERE id = ? AND user_id = ?');
-        const result = stmt.run(resumeId, userId);
+        const stmt = db.prepare(
+            'UPDATE resumes SET deleted = 1, deleted_at = ? WHERE id = ? AND user_id = ?'
+        );
+        const result = stmt.run(now, resumeId, userId);
 
         if (result.changes === 0) {
             return NextResponse.json({ message: 'Resume not found or access denied' }, { status: 404 });

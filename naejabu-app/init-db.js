@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS users (
   hobby TEXT,
   specialty TEXT,
   motto TEXT,
+  is_temp_password INTEGER DEFAULT 0,
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );

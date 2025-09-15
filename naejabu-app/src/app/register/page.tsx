@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useLoading } from '../../context/LoadingContext'; // Import useLoading
 
 const RegisterPage = () => {
   const [name, setName] = useState('');
@@ -15,11 +16,11 @@ const RegisterPage = () => {
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, setIsLoading } = useLoading(); // Use global loading state
   const router = useRouter();
 
   const validateEmail = (email: string) => {
-    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const re = /^(([^<>()[\\]\\.,;:\\s@\"]+(\\.[^<>()[\\]\\.,;:\\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
   };
 
@@ -46,8 +47,9 @@ const RegisterPage = () => {
       }
     } catch (err) {
       setError('인증 코드 전송 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleVerifyCode = async () => {
@@ -70,8 +72,9 @@ const RegisterPage = () => {
       }
     } catch (err) {
       setError('인증 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleRegister = async () => {
@@ -97,8 +100,9 @@ const RegisterPage = () => {
       }
     } catch (err) {
       setError('회원가입 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const isRegisterDisabled = !isVerified || !password || !passwordConfirmation || password !== passwordConfirmation;

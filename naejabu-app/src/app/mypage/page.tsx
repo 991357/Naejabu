@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import LoggedInHeader from '../../components/LoggedInHeader';
 import withAuth from '../../components/withAuth';
 import RecommendationModal from '../../components/RecommendationModal';
+import Modal from '../../components/Modal'; // Import Modal component
 
 const getAuthHeaders = () => {
     const token = localStorage.getItem('token');
@@ -34,7 +35,13 @@ const MyPage = () => {
   const [motto, setMotto] = useState('');
   const [notification, setNotification] = useState({ message: '', type: '' });
 
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordNotification, setPasswordNotification] = useState({ message: '', type: '' });
+
   const [isRecModalOpen, setIsRecModalOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [recType, setRecType] = useState<'hobby' | 'specialty' | null>(null);
   const [currentSuggestions, setCurrentSuggestions] = useState<string[]>([]);
 
@@ -85,6 +92,45 @@ const MyPage = () => {
     }
   };
 
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordNotification({ message: '', type: '' });
+
+    if (newPassword !== confirmPassword) {
+      setPasswordNotification({ message: '새 비밀번호가 일치하지 않습니다.', type: 'error' });
+      return;
+    }
+    if (newPassword.length < 6) {
+        setPasswordNotification({ message: '비밀번호는 6자 이상이어야 합니다.', type: 'error' });
+        return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setPasswordNotification({ message: '비밀번호가 성공적으로 변경되었습니다!', type: 'success' });
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        setTimeout(() => {
+            setIsPasswordModalOpen(false);
+            setPasswordNotification({ message: '', type: '' });
+        }, 2000);
+      } else {
+        throw new Error(data.message || 'Failed to change password');
+      }
+    } catch (error: any) {
+      setPasswordNotification({ message: error.message || '비밀번호 변경에 실패했습니다. 다시 시도해주세요.', type: 'error' });
+    }
+  };
+
   const handleOpenRecs = (type: 'hobby' | 'specialty') => {
     setRecType(type);
     if (type === 'hobby') {
@@ -128,6 +174,14 @@ const MyPage = () => {
                 <div className="mt-4 space-y-2">
                   <p><span className="font-semibold">이름:</span> {user?.name}</p>
                   <p><span className="font-semibold">이메일:</span> {user?.email}</p>
+                </div>
+                <div className="mt-6">
+                    <button 
+                        onClick={() => setIsPasswordModalOpen(true)}
+                        className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors"
+                    >
+                        비밀번호 변경
+                    </button>
                 </div>
               </div>
             </div>
@@ -178,6 +232,32 @@ const MyPage = () => {
           </div>
         </main>
       </div>
+
+      {/* Password Change Modal */}
+      <Modal isOpen={isPasswordModalOpen} onClose={() => setIsPasswordModalOpen(false)}>
+        <form onSubmit={handlePasswordChange} className="bg-white rounded-lg p-6 w-full max-w-lg">
+            <h2 className="font-heading text-2xl font-bold text-primary border-b pb-3 mb-6">비밀번호 변경</h2>
+            <div className="space-y-6">
+                <div>
+                    <label className="block text-gray-800 text-lg font-semibold mb-2" htmlFor="currentPassword">현재 비밀번호</label>
+                    <input id="currentPassword" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="shadow-md appearance-none border rounded-lg w-full py-3 px-4 text-gray-700" required />
+                </div>
+                <div>
+                    <label className="block text-gray-800 text-lg font-semibold mb-2" htmlFor="newPassword">새 비밀번호</label>
+                    <input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="shadow-md appearance-none border rounded-lg w-full py-3 px-4 text-gray-700" required />
+                </div>
+                <div>
+                    <label className="block text-gray-800 text-lg font-semibold mb-2" htmlFor="confirmPassword">새 비밀번호 확인</label>
+                    <input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="shadow-md appearance-none border rounded-lg w-full py-3 px-4 text-gray-700" required />
+                </div>
+            </div>
+            <div className="mt-8 flex justify-end items-center">
+                {passwordNotification.message && <p className={`mr-4 text-sm ${passwordNotification.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>{passwordNotification.message}</p>}
+                <button type="submit" className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300">변경하기</button>
+            </div>
+        </form>
+      </Modal>
+
       <RecommendationModal
         isOpen={isRecModalOpen}
         onClose={() => setIsRecModalOpen(false)}

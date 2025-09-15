@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
 
-    const stmt = db.prepare('SELECT * FROM resumes WHERE user_id = ? ORDER BY updated_at DESC');
+    const stmt = db.prepare('SELECT * FROM resumes WHERE user_id = ? AND deleted = 0 ORDER BY updated_at DESC');
     const resumes = stmt.all(userId);
 
     return NextResponse.json(resumes);
