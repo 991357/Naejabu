@@ -1,4 +1,4 @@
-# 📄 내자부 (Naejabu) - 자기소개서 관리 서비스
+# 📄 내자부 (내 자소서를 부탁해) - 자기소개서 관리 서비스
 
 [![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
