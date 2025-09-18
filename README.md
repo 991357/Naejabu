@@ -1,4 +1,4 @@
-# 📄 내자부 (Naejabu) - 이력서 관리 서비스
+# 📄 내자부 (내 자소서를 부탁해) - 자기소개서 관리 서비스
 
 [![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
@@ -7,7 +7,7 @@
 
 ## 📝 프로젝트 설명
 
-내자부는 이력서를 손쉽게 작성하고 관리할 수 있는 웹 애플리케이션입니다. 맞춤법 검사 기능으로 보다 전문적인 이력서를 작성할 수 있도록 도와줍니다.
+내자부는 자기소개서를 손쉽게 작성하고 관리할 수 있는 웹 애플리케이션입니다.
 
 ## ✨ 주요 기능
 
