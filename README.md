@@ -59,13 +59,18 @@
     npm install
     ```
 
-### 🏃‍♂️ 개발 서버 실행
+### ⚙️ 빌드 및 프로덕션 실행
 
-```bash
-npm run dev
-```
+1.  프로덕션용으로 애플리케이션을 빌드합니다:
+    ```bash
+    npm run build
+    ```
+2.  빌드된 애플리케이션을 실행합니다:
+    ```bash
+    npm run start
+    ```
 
-브라우저에서 [http://localhost:3000](http://localhost:3000)으로 접속하여 결과를 확인하세요.
+기본적으로 [http://localhost:3000](http://localhost:3000)에서 애플리케이션이 실행됩니다.
 
 ## 🛠️ 사용된 기술
 
