@@ -17,18 +17,26 @@ const CreateResumeModal: React.FC<CreateResumeModalProps> = ({ onClose, onCreate
   const [companyName, setCompanyName] = useState('');
   const [deadline, setDeadline] = useState(getTodayAt2359());
   const [questions, setQuestions] = useState([
-    { id: Date.now(), value: '' },
-    { id: Date.now() + 1, value: '' },
+    { id: Date.now(), value: '', answer: '', charLimit: 1000 },
+    { id: Date.now() + 1, value: '', answer: '', charLimit: 1000 },
   ]);
   const [error, setError] = useState('');
   const deadlineInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddQuestion = () => {
-    setQuestions([...questions, { id: Date.now(), value: '' }]);
+    setQuestions([...questions, { id: Date.now(), value: '', answer: '', charLimit: 1000 }]);
   };
 
   const handleQuestionChange = (id: number, value: string) => {
     setQuestions(questions.map(q => q.id === id ? { ...q, value } : q));
+  };
+
+  const handleAnswerChange = (id: number, answer: string) => {
+    setQuestions(questions.map(q => q.id === id ? { ...q, answer } : q));
+  };
+
+  const handleCharLimitChange = (id: number, charLimit: number) => {
+    setQuestions(questions.map(q => q.id === id ? { ...q, charLimit } : q));
   };
 
   const handleRemoveQuestion = (id: number) => {
@@ -56,7 +64,8 @@ const CreateResumeModal: React.FC<CreateResumeModalProps> = ({ onClose, onCreate
         questions: questions.map(q => ({
             id: q.id,
             question_text: q.value,
-            answer_text: ''
+            answer_text: q.answer,
+            char_limit: q.charLimit
         }))
     });
   };
@@ -113,10 +122,27 @@ const CreateResumeModal: React.FC<CreateResumeModalProps> = ({ onClose, onCreate
                     placeholder="질문 내용을 입력하세요."
                     value={q.value}
                     onChange={(e) => handleQuestionChange(q.id, e.target.value)}
-                    rows={4}
+                    rows={2}
+                  />
+                  <textarea
+                    className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-relaxed focus:outline-none focus:ring-2 focus:ring-accent transition-shadow mt-4"
+                    placeholder="답변을 입력하세요."
+                    value={q.answer}
+                    onChange={(e) => handleAnswerChange(q.id, e.target.value)}
+                    rows={5}
+                    maxLength={q.charLimit}
                   />
                   <div className="text-right text-sm text-gray-500 mt-2">
-                    {q.value.length}자
+                    ({q.answer.length}/{q.charLimit}자)
+                  </div>
+                  <div className="flex justify-end items-center mt-2 space-x-2">
+                    <input
+                        type="number"
+                        value={q.charLimit}
+                        onChange={(e) => handleCharLimitChange(q.id, parseInt(e.target.value, 10))}
+                        className="w-24 text-right text-sm text-gray-500 border-b focus:outline-none focus:ring-0 focus:border-accent"
+                    />
+                    <span className="text-sm text-gray-500">자</span>
                   </div>
                 </div>
               ))}

@@ -30,7 +30,7 @@ const LoginPage = () => {
 
       if (response.ok) {
         localStorage.setItem('token', data.token);
-        router.push('/resumes');
+        window.location.href = '/resumes';
       } else {
         setError(data.message || 'An error occurred');
       }
@@ -43,11 +43,7 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center relative bg-gray-100">
-      <div className="absolute top-8 left-8">
-        <Link href="/" className="bg-white hover:bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors shadow-sm">
-            홈으로
-        </Link>
-      </div>
+
       <div className="bg-white shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4 w-full max-w-md">
         <h1 className="font-heading text-3xl font-bold text-center mb-8 text-primary">로그인</h1>
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}

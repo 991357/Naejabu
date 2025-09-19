@@ -3,9 +3,9 @@ import bcrypt from 'bcryptjs';
 import db from '@/lib/db'; // Using alias for cleaner imports
 
 export async function POST(req: NextRequest) {
-  const { name, email, password } = await req.json();
+  const { name, email, password, nickname } = await req.json();
 
-  if (!name || !email || !password) {
+  if (!name || !email || !password || !nickname) {
     return NextResponse.json({ message: 'All fields are required' }, { status: 400 });
   }
 
@@ -20,11 +20,11 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const stmt = db.prepare(
-      'INSERT INTO users (name, email, password_hash, created_at, updated_at) VALUES (?, ?, ?, ?, ?)'
+      'INSERT INTO users (name, email, password_hash, nickname, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)'
     );
 
     const now = new Date().toISOString();
-    const result = stmt.run(name, email, hashedPassword, now, now);
+    const result = stmt.run(name, email, hashedPassword, nickname, now, now);
 
     return NextResponse.json(
       { message: 'User registered successfully', userId: result.lastInsertRowid },
@@ -32,10 +32,18 @@ export async function POST(req: NextRequest) {
     );
   } catch (error: any) {
     if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
-      return NextResponse.json(
-        { message: 'User with this email already exists' },
-        { status: 409 }
-      );
+      if (error.message.includes('email')) {
+        return NextResponse.json(
+          { message: 'User with this email already exists' },
+          { status: 409 }
+        );
+      }
+      if (error.message.includes('nickname')) {
+        return NextResponse.json(
+          { message: 'This nickname is already taken' },
+          { status: 409 }
+        );
+      }
     }
 
     console.error('Registration Error:', error);

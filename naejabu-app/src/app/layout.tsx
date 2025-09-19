@@ -1,42 +1,25 @@
 'use client';
 
-import type { Metadata } from "next";
-import { Roboto, Poppins, Nanum_Myeongjo } from "next/font/google";
-import "./globals.css";
-import { LoadingProvider, useLoading } from "../context/LoadingContext";
-import LoadingSpinner from "../components/LoadingSpinner";
-import { ReactNode } from "react";
+import './globals.css';
+import { ReactNode } from 'react';
+import { LoadingProvider, useLoading } from '../context/LoadingContext';
+import LoadingSpinner from '../components/LoadingSpinner';
+import GlobalHeader from '../components/GlobalHeader';
+import { Noto_Sans_KR } from 'next/font/google';
 
-const roboto = Roboto({ 
-  subsets: ["latin"],
-  weight: ['400', '700'],
-  variable: '--font-roboto',
-});
-
-const poppins = Poppins({
+const notoSansKr = Noto_Sans_KR({
   subsets: ['latin'],
-  weight: ['700', '900'],
-  variable: '--font-poppins',
+  weight: ['400', '700', '900'],
+  variable: '--font-noto-sans-kr',
 });
-
-const nanumMyeongjo = Nanum_Myeongjo({
-  subsets: ['latin'],
-  weight: ['700', '800'],
-  variable: '--font-nanum-myeongjo',
-});
-
-// Metadata export is not allowed in client components.
-// export const metadata: Metadata = {
-//   title: "내자부 - 내 자소서를 부탁해",
-//   description: "AI 자소서 작성 도우미",
-// };
 
 function AppContent({ children }: { children: ReactNode }) {
     const { isLoading } = useLoading();
     return (
         <>
             <LoadingSpinner isOpen={isLoading} />
-            {children}
+            <GlobalHeader />
+            <main className="pt-16">{children}</main>
         </>
     );
 }
@@ -48,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={`${roboto.variable} ${poppins.variable} ${nanumMyeongjo.variable} font-body bg-secondary text-text`}>
+      <body className={`${notoSansKr.variable} font-sans bg-secondary text-text`}>
         <LoadingProvider>
             <AppContent>{children}</AppContent>
         </LoadingProvider>

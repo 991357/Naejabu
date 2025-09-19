@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import LoggedInHeader from '../../components/LoggedInHeader';
+
 import withAuth from '../../components/withAuth';
 import RecommendationModal from '../../components/RecommendationModal';
 import Modal from '../../components/Modal'; // Import Modal component
@@ -27,6 +27,7 @@ const MyPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   
   const [name, setName] = useState('');
+  const [nickname, setNickname] = useState('');
   const [englishName, setEnglishName] = useState('');
   const [hanjaName, setHanjaName] = useState('');
   const [birthdate, setBirthdate] = useState('');
@@ -34,6 +35,7 @@ const MyPage = () => {
   const [specialty, setSpecialty] = useState('');
   const [motto, setMotto] = useState('');
   const [notification, setNotification] = useState({ message: '', type: '' });
+  const [nicknameNotification, setNicknameNotification] = useState({ message: '', type: '' });
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -54,6 +56,7 @@ const MyPage = () => {
           const userData = await response.json();
           setUser(userData);
           setName(userData.name || '');
+          setNickname(userData.nickname || '');
           setEnglishName(userData.english_name || '');
           setHanjaName(userData.hanja_name || '');
           setBirthdate(userData.birthdate || '');
@@ -89,6 +92,27 @@ const MyPage = () => {
     } catch (error) {
       console.error('Failed to save user data', error);
       setNotification({ message: '저장에 실패했습니다. 다시 시도해주세요.', type: 'error' });
+    }
+  };
+
+  const handleNicknameChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setNicknameNotification({ message: '', type: '' });
+    try {
+      const response = await fetch('/api/auth/change-nickname', {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ nickname }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setUser({ ...user, nickname });
+        setNicknameNotification({ message: '닉네임이 성공적으로 변경되었습니다!', type: 'success' });
+      } else {
+        throw new Error(data.message || 'Failed to change nickname');
+      }
+    } catch (error: any) {
+      setNicknameNotification({ message: error.message || '닉네임 변경에 실패했습니다.', type: 'error' });
     }
   };
 
@@ -164,7 +188,7 @@ const MyPage = () => {
   return (
     <>
       <div className="min-h-screen bg-gray-50">
-        <LoggedInHeader />
+        
         <main className="container mx-auto p-8">
           <h1 className="font-heading text-4xl font-bold text-primary mb-8">마이페이지</h1>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -173,6 +197,7 @@ const MyPage = () => {
                 <h2 className="font-heading text-2xl font-bold text-primary border-b pb-3">기본 정보</h2>
                 <div className="mt-4 space-y-2">
                   <p><span className="font-semibold">이름:</span> {user?.name}</p>
+                  <p><span className="font-semibold">닉네임:</span> {user?.nickname || '설정되지 않음'}</p>
                   <p><span className="font-semibold">이메일:</span> {user?.email}</p>
                 </div>
                 <div className="mt-6">
@@ -186,6 +211,17 @@ const MyPage = () => {
               </div>
             </div>
             <div className="md:col-span-2">
+              <form onSubmit={handleNicknameChange} className="bg-white shadow-lg rounded-lg p-6 mb-8">
+                <h2 className="font-heading text-2xl font-bold text-primary border-b pb-3 mb-6">닉네임 변경</h2>
+                <div>
+                  <label className="block text-gray-800 text-lg font-semibold mb-2" htmlFor="nickname">새 닉네임</label>
+                  <div className="flex items-center gap-4">
+                    <input id="nickname" type="text" value={nickname} onChange={(e) => setNickname(e.target.value)} className="shadow-md appearance-none border rounded-lg w-full py-3 px-4 text-gray-700" placeholder="2자 이상, 비속어 제외" />
+                    <button type="submit" className="bg-accent hover:bg-opacity-90 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 whitespace-nowrap">변경</button>
+                  </div>
+                  {nicknameNotification.message && <p className={`mt-2 text-sm ${nicknameNotification.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>{nicknameNotification.message}</p>}
+                </div>
+              </form>
               <form onSubmit={handleSave} className="bg-white shadow-lg rounded-lg p-6">
                 <h2 className="font-heading text-2xl font-bold text-primary border-b pb-3 mb-6">내 정보 관리</h2>
                 <div className="space-y-6">

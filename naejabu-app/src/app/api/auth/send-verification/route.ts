@@ -11,6 +11,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Email is required' }, { status: 400 });
     }
 
+    // Check if email already exists
+    const userStmt = db.prepare('SELECT id FROM users WHERE email = ?');
+    const existingUser = userStmt.get(email);
+
+    if (existingUser) {
+      return NextResponse.json({ message: '이미 가입된 이메일입니다.' }, { status: 409 });
+    }
+
     // Generate a 6-digit random code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expires_at = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutes from now

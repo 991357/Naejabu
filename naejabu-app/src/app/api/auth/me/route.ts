@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: 'Authentication required' }, { status: 401 });
     }
 
-    const stmt = db.prepare('SELECT id, email, name, english_name, hanja_name, birthdate, hobby, specialty, motto, is_temp_password, created_at, updated_at FROM users WHERE id = ?');
+    const stmt = db.prepare('SELECT id, email, name, nickname, is_admin, english_name, hanja_name, birthdate, hobby, specialty, motto, is_temp_password, created_at, updated_at FROM users WHERE id = ?');
     const user = stmt.get(userId);
 
     if (!user) {

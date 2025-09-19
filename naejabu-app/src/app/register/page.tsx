@@ -7,6 +7,7 @@ import { useLoading } from '../../context/LoadingContext'; // Import useLoading
 
 const RegisterPage = () => {
   const [name, setName] = useState('');
+  const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
@@ -36,7 +37,7 @@ const RegisterPage = () => {
       const response = await fetch('/api/auth/send-verification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ email }),
       });
       const data = await response.json();
       if (response.ok) {
@@ -89,7 +90,7 @@ const RegisterPage = () => {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, nickname, email, password }),
       });
       const data = await response.json();
       if (response.ok) {
@@ -109,22 +110,28 @@ const RegisterPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center relative bg-gray-50">
-      <div className="absolute top-8 left-8">
-        <Link href="/" className="bg-white border border-gray-300 hover:bg-gray-100 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors">
-            홈으로
-        </Link>
-      </div>
+
       <div className="bg-white shadow-xl rounded-lg px-8 pt-6 pb-8 mb-4 w-full max-w-md">
         <h1 className="font-heading text-3xl font-bold text-center mb-8 text-primary">회원가입</h1>
         {error && <p className="text-red-500 text-center mb-4 font-semibold">{error}</p>}
         {success && <p className="text-green-500 text-center mb-4 font-semibold">{success}</p>}
         
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">이름/닉네임</label>
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">이름</label>
           <input 
             className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-accent"
             id="name" type="text" placeholder="홍길동"
             value={name} onChange={(e) => setName(e.target.value)}
+            disabled={isVerified}
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="nickname">닉네임</label>
+          <input 
+            className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-accent"
+            id="nickname" type="text" placeholder="사용할 닉네임을 입력하세요"
+            value={nickname} onChange={(e) => setNickname(e.target.value)}
             disabled={isVerified}
           />
         </div>

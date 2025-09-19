@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import LoggedInHeader from '../../components/LoggedInHeader';
+
 import Modal from '../../components/Modal';
 import CreateResumeModal from '../../components/CreateResumeModal';
 import withAuth from '../../components/withAuth';
@@ -148,7 +148,7 @@ const ResumesPage = () => {
 
   return (
     <div className="min-h-screen">
-      <LoggedInHeader />
+      
       <main className="container mx-auto p-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="font-heading text-4xl font-bold text-primary">내 자소서 목록</h1>

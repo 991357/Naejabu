@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import LoggedInHeader from '../../../components/LoggedInHeader';
+
 import withAuth from '../../../components/withAuth';
 import Modal from '../../../components/Modal';
 import EditResumeModal from '../../../components/EditResumeModal';
 import SpellCheckModal from '../../../components/SpellCheckModal';
+import AlertModal from '../../../components/AlertModal';
 
 const getAuthHeaders = () => {
     const token = localStorage.getItem('token');
@@ -30,10 +31,17 @@ const ResumeDetailPage = () => {
   const [isDirty, setIsDirty] = useState(false);
   const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
   const [nextUrl, setNextUrl] = useState<string | null>(null);
+  const [alertModalOpen, setAlertModalOpen] = useState(false);
+  const [alertModalMessage, setAlertModalMessage] = useState('');
 
   const params = useParams();
   const router = useRouter();
   const { id } = params;
+
+  const openAlertModal = (message: string) => {
+    setAlertModalMessage(message);
+    setAlertModalOpen(true);
+  };
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -117,14 +125,18 @@ const ResumeDetailPage = () => {
     const response = await fetch(`/api/resumes/${id}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ questions: updatedQuestions }),
+      body: JSON.stringify({ 
+        company_name: resume.company_name,
+        deadline: resume.deadline,
+        questions: updatedQuestions 
+      }),
     });
 
     if (response.ok) {
       setIsDirty(false);
-      alert('저장되었습니다.');
+      openAlertModal('저장되었습니다.');
     } else {
-      alert('저장에 실패했습니다.');
+      openAlertModal('저장에 실패했습니다.');
     }
   };
 
@@ -138,9 +150,9 @@ const ResumeDetailPage = () => {
     if (response.ok) {
         fetchResumeDetail();
         setIsEditModalOpen(false);
-        alert('수정되었습니다.');
+        openAlertModal('수정되었습니다.');
     } else {
-        alert('수정에 실패했습니다.');
+        openAlertModal('수정에 실패했습니다.');
     }
   };
 
@@ -197,7 +209,7 @@ const ResumeDetailPage = () => {
 
   return (
     <div className="min-h-screen">
-      <LoggedInHeader onNavigate={handleNavigate} />
+      <AlertModal isOpen={alertModalOpen} onClose={() => setAlertModalOpen(false)} message={alertModalMessage} />
       <main className="container mx-auto p-8">
         <div className="flex justify-between items-center mb-6">
           <div>
@@ -235,7 +247,7 @@ const ResumeDetailPage = () => {
                 >
                   {spellCheckLoading[q.id] ? '검사 중...' : '맞춤법 검사'}
                 </button>
-                <span>글자 수: {(answers[q.id] || '').length}</span>
+                <span>{(answers[q.id] || '').length} / 1000 자</span>
               </div>
             </div>
           ))}

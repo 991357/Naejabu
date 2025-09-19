@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import LoggedInHeader from '@/components/LoggedInHeader';
+
 import Image from 'next/image';
+import AlertModal from '@/components/AlertModal';
 
 interface Resume {
     id: number;
@@ -17,6 +18,13 @@ const TrashPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
+    const [alertModalOpen, setAlertModalOpen] = useState(false);
+    const [alertModalMessage, setAlertModalMessage] = useState('');
+
+    const openAlertModal = (message: string) => {
+        setAlertModalMessage(message);
+        setAlertModalOpen(true);
+    };
 
     useEffect(() => {
         const fetchTrashedResumes = async () => {
@@ -73,7 +81,7 @@ const TrashPage = () => {
             setTrashedResumes(trashedResumes.filter(resume => resume.id !== id));
 
         } catch (err: any) {
-            alert(err.message);
+            openAlertModal(err.message);
         }
     };
     
@@ -89,7 +97,7 @@ const TrashPage = () => {
 
     return (
         <div className="min-h-screen bg-background">
-            <LoggedInHeader />
+            <AlertModal isOpen={alertModalOpen} onClose={() => setAlertModalOpen(false)} message={alertModalMessage} />
             <main className="container mx-auto p-8 font-sans">
                 <h1 className="text-3xl font-bold mb-8 text-text-primary">휴지통</h1>
 

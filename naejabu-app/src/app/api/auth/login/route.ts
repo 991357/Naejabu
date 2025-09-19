@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
   const { email, password } = await req.json();
 
   if (!email || !password) {
-    return NextResponse.json({ message: 'Email and password are required' }, { status: 400 });
+    return NextResponse.json({ message: '이메일과 비밀번호를 모두 입력해주세요.' }, { status: 400 });
   }
 
   try {
@@ -19,20 +19,19 @@ export async function POST(req: NextRequest) {
       if (isPasswordValid) {
         const token = jwt.sign(
           { id: user.id, name: user.name },
-          process.env.JWT_SECRET || 'your-default-secret',
-          { expiresIn: '1h' }
+          process.env.JWT_SECRET || 'your-default-secret'
         );
         return NextResponse.json({ token });
       }
     }
 
     // If user is not found or password is not valid, return the same error for security.
-    return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+    return NextResponse.json({ message: '이메일 또는 비밀번호가 올바르지 않습니다.' }, { status: 401 });
 
   } catch (error: any) {
     console.error('Login Error:', error);
     return NextResponse.json(
-      { message: 'An error occurred during login.' },
+      { message: '로그인 중 오류가 발생했습니다.' },
       { status: 500 }
     );
   }
