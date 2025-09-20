@@ -14,28 +14,30 @@ const EditResumeModal: React.FC<EditResumeModalProps> = ({ resume, onClose, onSa
   useEffect(() => {
     if (resume) {
       setCompanyName(resume.company_name);
-      setDeadline(new Date(resume.deadline).toISOString().slice(0, 16));
+      // Format deadline for datetime-local input, considering timezone
+      const localDeadline = new Date(resume.deadline);
+      const offset = localDeadline.getTimezoneOffset();
+      const adjustedDeadline = new Date(localDeadline.getTime() - (offset * 60 * 1000));
+      setDeadline(adjustedDeadline.toISOString().slice(0, 16));
+      
       setQuestions(resume.questions || []);
     }
   }, [resume]);
 
   const handleAddQuestion = () => {
-    setQuestions([...questions, { id: Date.now(), question_text: '', answer_text: '', char_limit: 1000 }]);
+    // New questions in edit mode don't need an answer field. It will be an empty string by default in DB.
+    setQuestions([...questions, { id: `new-${Date.now()}`, question_text: '', char_limit: 1000 }]);
   };
 
-  const handleQuestionChange = (id: number, value: string) => {
+  const handleQuestionChange = (id: number | string, value: string) => {
     setQuestions(questions.map(q => q.id === id ? { ...q, question_text: value } : q));
   };
 
-  const handleAnswerChange = (id: number, value: string) => {
-    setQuestions(questions.map(q => q.id === id ? { ...q, answer_text: value } : q));
+  const handleCharLimitChange = (id: number | string, charLimit: number) => {
+    setQuestions(questions.map(q => q.id === id ? { ...q, char_limit: isNaN(charLimit) ? 0 : charLimit } : q));
   };
 
-  const handleCharLimitChange = (id: number, charLimit: number) => {
-    setQuestions(questions.map(q => q.id === id ? { ...q, char_limit: charLimit } : q));
-  };
-
-  const handleRemoveQuestion = (id: number) => {
+  const handleRemoveQuestion = (id: number | string) => {
     setQuestions(questions.filter(q => q.id !== id));
   };
 
@@ -45,7 +47,7 @@ const EditResumeModal: React.FC<EditResumeModalProps> = ({ resume, onClose, onSa
       ...resume,
       company_name: companyName,
       deadline,
-      questions,
+      questions, // Pass the updated questions array, which still contains the original answers
     });
   };
 
@@ -96,25 +98,17 @@ const EditResumeModal: React.FC<EditResumeModalProps> = ({ resume, onClose, onSa
                   placeholder="질문 내용을 입력하세요."
                   value={q.question_text}
                   onChange={(e) => handleQuestionChange(q.id, e.target.value)}
-                  rows={2}
+                  rows={3}
                 />
-                <textarea
-                  className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-relaxed focus:outline-none focus:ring-2 focus:ring-accent transition-shadow mt-4"
-                  placeholder="답변을 입력하세요."
-                  value={q.answer_text}
-                  onChange={(e) => handleAnswerChange(q.id, e.target.value)}
-                  rows={5}
-                  maxLength={q.char_limit}
-                />
-                <div className="text-right text-sm text-gray-500 mt-2">
-                  ({q.answer_text?.length || 0}/{q.char_limit}자)
-                </div>
-                <div className="flex justify-end items-center mt-2 space-x-2">
+                <div className="flex justify-end items-center mt-3 space-x-2">
+                    <label htmlFor={`charLimit-edit-${q.id}`} className="text-sm text-gray-600">글자 수 제한:</label>
                     <input
+                        id={`charLimit-edit-${q.id}`}
                         type="number"
                         value={q.char_limit}
                         onChange={(e) => handleCharLimitChange(q.id, parseInt(e.target.value, 10))}
-                        className="w-24 text-right text-sm text-gray-500 border-b focus:outline-none focus:ring-0 focus:border-accent"
+                        className="w-24 text-right text-sm text-gray-700 border-b focus:outline-none focus:ring-0 focus:border-accent"
+                        step="100"
                     />
                     <span className="text-sm text-gray-500">자</span>
                 </div>

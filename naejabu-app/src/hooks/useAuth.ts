@@ -7,6 +7,7 @@ interface User {
   name: string;
   nickname: string;
   is_admin: number;
+  role: string;
 }
 
 const useAuth = () => {

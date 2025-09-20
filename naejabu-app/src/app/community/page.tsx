@@ -10,6 +10,7 @@ const NoticeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-8 
 const GeneralIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a2 2 0 01-2-2V7a2 2 0 012-2h6l2-2h2l-2 2z" /></svg>;
 const JobsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>;
 const InquiryIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>;
+const MentorApplyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /><path strokeLinecap="round" strokeLinejoin="round" d="M18 11v6m-3-3h6" /></svg>;
 
 const CommunityHomePage = () => {
   const { user } = useAuth();
@@ -21,6 +22,7 @@ const CommunityHomePage = () => {
     { id: 'general', name: '자유게시판', icon: <GeneralIcon />, color: 'bg-blue-100 text-blue-800' },
     { id: 'jobs', name: '채용공고', icon: <JobsIcon />, color: 'bg-green-100 text-green-800' },
     { id: 'inquiry', name: '문의/건의', icon: <InquiryIcon />, color: 'bg-yellow-100 text-yellow-800' },
+    { id: 'mentor-apply', name: '멘토 등록 신청', icon: <MentorApplyIcon />, color: 'bg-purple-100 text-purple-800' },
   ];
 
   useEffect(() => {

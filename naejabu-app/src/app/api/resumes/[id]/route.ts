@@ -63,10 +63,10 @@ const updateResumeWithQuestions = db.transaction((data) => {
 
     if (questions && questions.length > 0) {
         const insertQuestionStmt = db.prepare(
-            'INSERT INTO resume_questions (resume_id, question_text, answer_text) VALUES (?, ?, ?)'
+            'INSERT INTO resume_questions (resume_id, question_text, answer_text, char_limit) VALUES (?, ?, ?, ?)'
         );
         for (const q of questions) {
-            insertQuestionStmt.run(resumeId, q.question_text, q.answer_text || '');
+            insertQuestionStmt.run(resumeId, q.question_text, q.answer_text || '', q.char_limit || 1000);
         }
     }
     return { id: resumeId }; 

@@ -8,6 +8,17 @@ import Modal from '../../../components/Modal';
 import EditResumeModal from '../../../components/EditResumeModal';
 import SpellCheckModal from '../../../components/SpellCheckModal';
 import AlertModal from '../../../components/AlertModal';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+
+// Helper to get text length from HTML
+const getTextLength = (html: string) => {
+  if (typeof window === 'undefined') {
+    return 0;
+  }
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent?.trim().length || 0;
+};
 
 const getAuthHeaders = () => {
     const token = localStorage.getItem('token');
@@ -234,10 +245,11 @@ const ResumeDetailPage = () => {
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <label className="block font-heading text-primary text-2xl font-bold mb-4">{index + 1}. {q.question_text}</label>
-              <textarea
-                className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-text leading-tight focus:outline-none focus:ring-2 focus:ring-accent min-h-[250px] text-lg"
+              <ReactQuill
+                theme="snow"
+                className="bg-white"
                 value={answers[q.id] || ''}
-                onChange={(e) => handleAnswerChange(q.id, e.target.value)}
+                onChange={(value) => handleAnswerChange(q.id, value)}
               />
               <div className="flex justify-between items-center mt-2 text-sm text-gray-500">
                 <button
@@ -247,7 +259,7 @@ const ResumeDetailPage = () => {
                 >
                   {spellCheckLoading[q.id] ? '검사 중...' : '맞춤법 검사'}
                 </button>
-                <span>{(answers[q.id] || '').length} / 1000 자</span>
+                <span>{getTextLength(answers[q.id] || '')} / {q.char_limit || 1000} 자</span>
               </div>
             </div>
           ))}

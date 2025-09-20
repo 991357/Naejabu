@@ -95,6 +95,7 @@ const WritePostPage = () => {
           >
             <option value="general">자유게시판</option>
             <option value="inquiry">문의/건의</option>
+            <option value="mentor-apply">멘토 등록 신청</option>
             {user?.is_admin === 1 && <option value="notice">공지사항</option>}
             {user?.is_admin === 1 && <option value="jobs">채용공고</option>}
           </select>

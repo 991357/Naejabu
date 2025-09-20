@@ -47,11 +47,10 @@ const createResumeWithQuestions = db.transaction((resumeData) => {
 
     if (questions && questions.length > 0) {
         const questionStmt = db.prepare(
-            'INSERT INTO resume_questions (resume_id, question_text, answer_text) VALUES (?, ?, ?)'
+            'INSERT INTO resume_questions (resume_id, question_text, answer_text, char_limit) VALUES (?, ?, ?, ?)'
         );
         for (const q of questions) {
-            // The frontend sends question objects with question_text, we add empty answer_text
-            questionStmt.run(resumeId, q.question_text, ''); 
+            questionStmt.run(resumeId, q.question_text, '', q.char_limit || 1000); 
         }
     }
     return resumeId;

@@ -199,6 +199,7 @@ const MyPage = () => {
                   <p><span className="font-semibold">이름:</span> {user?.name}</p>
                   <p><span className="font-semibold">닉네임:</span> {user?.nickname || '설정되지 않음'}</p>
                   <p><span className="font-semibold">이메일:</span> {user?.email}</p>
+                  <p><span className="font-semibold">역할:</span> {user?.role === 'mentor' ? '멘토' : '멘티'}</p>
                 </div>
                 <div className="mt-6">
                     <button 

@@ -35,15 +35,10 @@ const GlobalHeader = () => {
     }
   };
 
-  const handleProofreadingClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    openAlertModal('기능 구현 중입니다.');
-  };
-
   const navLinks = [
     { href: '/resumes', label: '자소서' },
     { href: '/community', label: '커뮤니티' },
-    { href: '#', label: '첨삭받기', onClick: handleProofreadingClick },
+    { href: '/feedback', label: '첨삭받기' },
     { href: '/trash', label: '휴지통' },
   ];
 

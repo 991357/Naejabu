@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
 
 export async function GET(req: NextRequest) {
-  const categories = ['notice', 'general', 'jobs', 'inquiry'];
+  const categories = ['notice', 'general', 'jobs', 'inquiry', 'mentor-apply'];
   const postsByCategory: { [key: string]: any[] } = {};
 
   try {

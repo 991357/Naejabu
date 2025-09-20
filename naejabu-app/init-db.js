@@ -1,4 +1,3 @@
-
 const Database = require('better-sqlite3');
 const path = require('path');
 
@@ -13,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT NOT NULL,
   nickname TEXT UNIQUE,
   is_admin INTEGER DEFAULT 0,
+  role TEXT NOT NULL DEFAULT 'mentee',
   english_name TEXT,
   hanja_name TEXT,
   birthdate TEXT,
@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS resume_questions (
   resume_id INTEGER NOT NULL,
   question_text TEXT NOT NULL,
   answer_text TEXT,
+  char_limit INTEGER NOT NULL DEFAULT 1000,
   FOREIGN KEY (resume_id) REFERENCES resumes (id) ON DELETE CASCADE
 );
 `;
@@ -72,10 +73,6 @@ CREATE TABLE IF NOT EXISTS posts (
 );
 `;
 
-db.exec(createUsersTable);
-db.exec(createResumesTable);
-db.exec(createResumeQuestionsTable);
-db.exec(createEmailVerificationsTable);
 const createCommentsTable = `
 CREATE TABLE IF NOT EXISTS comments (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -88,8 +85,52 @@ CREATE TABLE IF NOT EXISTS comments (
 );
 `;
 
+const createMentorApplicationsTable = `
+CREATE TABLE IF NOT EXISTS mentor_applications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+`;
+
+const createMentoringRequestsTable = `
+CREATE TABLE IF NOT EXISTS mentoring_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    resume_id INTEGER NOT NULL,
+    mentee_id INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending', -- 'pending', 'completed', 'canceled'
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (resume_id) REFERENCES resumes(id) ON DELETE CASCADE,
+    FOREIGN KEY (mentee_id) REFERENCES users(id) ON DELETE CASCADE
+);
+`;
+
+const createMentoringFeedbackTable = `
+CREATE TABLE IF NOT EXISTS mentoring_feedback (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    request_id INTEGER NOT NULL,
+    mentor_id INTEGER NOT NULL,
+    comment TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (request_id) REFERENCES mentoring_requests(id) ON DELETE CASCADE,
+    FOREIGN KEY (mentor_id) REFERENCES users(id) ON DELETE CASCADE
+);
+`;
+
+db.exec(createUsersTable);
+db.exec(createResumesTable);
+db.exec(createResumeQuestionsTable);
+db.exec(createEmailVerificationsTable);
 db.exec(createPostsTable);
 db.exec(createCommentsTable);
+db.exec(createMentorApplicationsTable);
+db.exec(createMentoringRequestsTable);
+db.exec(createMentoringFeedbackTable);
 
 // Add columns to users table if they don't exist
 try {
@@ -107,6 +148,11 @@ try {
 } catch (e) {
   if (!e.message.includes('duplicate column name')) console.error('DB Schema Alter Error (is_admin):', e.message);
 }
+try {
+  db.exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'mentee'");
+} catch (e) {
+  if (!e.message.includes('duplicate column name')) console.error('DB Schema Alter Error (role):', e.message);
+}
 
 try {
   db.exec("ALTER TABLE posts ADD COLUMN is_pinned INTEGER DEFAULT 0");
@@ -114,9 +160,15 @@ try {
   if (!e.message.includes('duplicate column name')) console.error('DB Schema Alter Error (is_pinned):', e.message);
 }
 
-// Grant admin rights to the 'admin' user
 try {
-    db.exec("UPDATE users SET is_admin = 1 WHERE email = 'admin'");
+  db.exec("ALTER TABLE resume_questions ADD COLUMN char_limit INTEGER NOT NULL DEFAULT 1000");
+} catch (e) {
+  if (!e.message.includes('duplicate column name')) console.error('DB Schema Alter Error (char_limit):', e.message);
+}
+
+// Grant admin rights and mentor role to the 'admin' user
+try {
+    db.exec("UPDATE users SET is_admin = 1, role = 'mentor' WHERE email = 'admin'");
 } catch (e) {
     console.error('DB Admin Grant Error:', e.message);
 }

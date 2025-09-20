@@ -6,37 +6,33 @@ interface CreateResumeModalProps {
 }
 
 const CreateResumeModal: React.FC<CreateResumeModalProps> = ({ onClose, onCreate }) => {
-  const getTodayAt2359 = () => {
+  const getDefaultDeadline = () => {
     const today = new Date();
     const offset = today.getTimezoneOffset();
     const todayWithOffset = new Date(today.getTime() - (offset*60*1000));
-    todayWithOffset.setHours(23, 59, 59, 999);
+    todayWithOffset.setHours(18, 0, 0, 0); // Set time to 18:00
     return todayWithOffset.toISOString().slice(0, 16);
   };
 
   const [companyName, setCompanyName] = useState('');
-  const [deadline, setDeadline] = useState(getTodayAt2359());
+  const [deadline, setDeadline] = useState(getDefaultDeadline());
   const [questions, setQuestions] = useState([
-    { id: Date.now(), value: '', answer: '', charLimit: 1000 },
-    { id: Date.now() + 1, value: '', answer: '', charLimit: 1000 },
+    { id: Date.now(), value: '', charLimit: 1000 },
+    { id: Date.now() + 1, value: '', charLimit: 700 },
   ]);
   const [error, setError] = useState('');
   const deadlineInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddQuestion = () => {
-    setQuestions([...questions, { id: Date.now(), value: '', answer: '', charLimit: 1000 }]);
+    setQuestions([...questions, { id: Date.now(), value: '', charLimit: 1000 }]);
   };
 
   const handleQuestionChange = (id: number, value: string) => {
     setQuestions(questions.map(q => q.id === id ? { ...q, value } : q));
   };
 
-  const handleAnswerChange = (id: number, answer: string) => {
-    setQuestions(questions.map(q => q.id === id ? { ...q, answer } : q));
-  };
-
   const handleCharLimitChange = (id: number, charLimit: number) => {
-    setQuestions(questions.map(q => q.id === id ? { ...q, charLimit } : q));
+    setQuestions(questions.map(q => q.id === id ? { ...q, charLimit: isNaN(charLimit) ? 0 : charLimit } : q));
   };
 
   const handleRemoveQuestion = (id: number) => {
@@ -52,6 +48,10 @@ const CreateResumeModal: React.FC<CreateResumeModalProps> = ({ onClose, onCreate
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!companyName.trim()) {
+        setError('회사명을 입력해주세요.');
+        return;
+    }
     const hasEmptyQuestion = questions.some(q => q.value.trim() === '');
     if (hasEmptyQuestion) {
         setError('모든 질문을 입력해주세요.');
@@ -62,10 +62,8 @@ const CreateResumeModal: React.FC<CreateResumeModalProps> = ({ onClose, onCreate
         company_name: companyName,
         deadline,
         questions: questions.map(q => ({
-            id: q.id,
             question_text: q.value,
-            answer_text: q.answer,
-            char_limit: q.charLimit
+            char_limit: q.charLimit,
         }))
     });
   };
@@ -122,25 +120,17 @@ const CreateResumeModal: React.FC<CreateResumeModalProps> = ({ onClose, onCreate
                     placeholder="질문 내용을 입력하세요."
                     value={q.value}
                     onChange={(e) => handleQuestionChange(q.id, e.target.value)}
-                    rows={2}
+                    rows={3}
                   />
-                  <textarea
-                    className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-relaxed focus:outline-none focus:ring-2 focus:ring-accent transition-shadow mt-4"
-                    placeholder="답변을 입력하세요."
-                    value={q.answer}
-                    onChange={(e) => handleAnswerChange(q.id, e.target.value)}
-                    rows={5}
-                    maxLength={q.charLimit}
-                  />
-                  <div className="text-right text-sm text-gray-500 mt-2">
-                    ({q.answer.length}/{q.charLimit}자)
-                  </div>
-                  <div className="flex justify-end items-center mt-2 space-x-2">
+                  <div className="flex justify-end items-center mt-3 space-x-2">
+                    <label htmlFor={`charLimit-${q.id}`} className="text-sm text-gray-600">글자 수 제한:</label>
                     <input
+                        id={`charLimit-${q.id}`}
                         type="number"
                         value={q.charLimit}
                         onChange={(e) => handleCharLimitChange(q.id, parseInt(e.target.value, 10))}
-                        className="w-24 text-right text-sm text-gray-500 border-b focus:outline-none focus:ring-0 focus:border-accent"
+                        className="w-24 text-right text-sm text-gray-700 border-b focus:outline-none focus:ring-0 focus:border-accent"
+                        step="100"
                     />
                     <span className="text-sm text-gray-500">자</span>
                   </div>
