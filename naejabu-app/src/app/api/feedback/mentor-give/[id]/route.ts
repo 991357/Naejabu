@@ -108,13 +108,29 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
             const feedbackResult = feedbackStmt.run(requestId, user.id, comment, now, now);
             const newFeedbackId = feedbackResult.lastInsertRowid;
 
-            // 2. Explicitly ensure the status remains 'pending' to prevent it from disappearing
+            // 2. Update request status
             const requestStmt = db.prepare(
                 'UPDATE mentoring_requests SET status = ?, updated_at = ? WHERE id = ?'
             );
-            requestStmt.run('pending', now, requestId);
+            requestStmt.run('completed', now, requestId);
 
-            // 3. Fetch the newly created feedback to return it
+            // 3. Create notification for the mentee
+            const menteeInfoStmt = db.prepare('SELECT mentee_id FROM mentoring_requests WHERE id = ?');
+            const menteeInfo = menteeInfoStmt.get(requestId) as { mentee_id: number };
+            if (menteeInfo) {
+                const notificationStmt = db.prepare(
+                    'INSERT INTO notifications (user_id, type, title, message, link) VALUES (?, ?, ?, ?, ?)'
+                );
+                notificationStmt.run(
+                    menteeInfo.mentee_id,
+                    'feedback',
+                    '멘토 피드백 도착',
+                    '신청하신 자기소개서에 멘토의 피드백이 도착했습니다.',
+                    `/feedback/results/${requestId}`
+                );
+            }
+
+            // 4. Fetch the newly created feedback to return it
             const newFeedbackStmt = db.prepare(`
                 SELECT 
                     mf.*,

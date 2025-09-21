@@ -122,6 +122,20 @@ CREATE TABLE IF NOT EXISTS mentoring_feedback (
 );
 `;
 
+const createNotificationsTable = `
+CREATE TABLE IF NOT EXISTS notifications (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  type TEXT NOT NULL,
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  link TEXT,
+  is_read INTEGER NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+`;
+
 db.exec(createUsersTable);
 db.exec(createResumesTable);
 db.exec(createResumeQuestionsTable);
@@ -131,6 +145,7 @@ db.exec(createCommentsTable);
 db.exec(createMentorApplicationsTable);
 db.exec(createMentoringRequestsTable);
 db.exec(createMentoringFeedbackTable);
+db.exec(createNotificationsTable);
 
 // Add columns to users table if they don't exist
 try {

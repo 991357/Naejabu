@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { FileText, Users, CheckCircle, ArrowRight, PlusCircle } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 import { useEffect, useState } from 'react';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 // Logged-out Homepage Component
 const LoggedOutHome = () => (
@@ -188,13 +189,8 @@ const LoggedInHome = ({ user }) => {
   );
 };
 
-
 export default function Home() {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return <div className="min-h-screen"></div>; // Or a loading spinner
-  }
+  const { user } = useAuth();
 
   return user ? <LoggedInHome user={user} /> : <LoggedOutHome />;
 }

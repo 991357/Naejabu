@@ -1,49 +1,69 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { useLoading } from '../../context/LoadingContext'; // Import useLoading
+import useAuth from '@/hooks/useAuth';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const { isLoading, setIsLoading } = useLoading(); // Use global loading state
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const { setUser, setToken } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('savedEmail');
+    if (savedEmail) {
+      setEmail(savedEmail);
+    }
+  }, []);
 
   const handleLogin = async () => {
     setError('');
-    setIsLoading(true); // Start loading
+    setIsLoggingIn(true);
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('token', data.token);
-        window.location.href = '/resumes';
+        const { token } = data;
+        localStorage.setItem('token', token);
+        localStorage.setItem('savedEmail', email);
+        setToken(token);
+
+        // Fetch user data
+        const meResponse = await fetch('/api/auth/me', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (meResponse.ok) {
+          const userData = await meResponse.json();
+          setUser(userData);
+          router.push('/resumes');
+        } else {
+          throw new Error('Failed to fetch user data after login.');
+        }
       } else {
         setError(data.message || 'An error occurred');
       }
-    } catch (err) {
-        setError('An unexpected error occurred. Please try again.');
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred. Please try again.');
     } finally {
-        setIsLoading(false); // Stop loading
+      setIsLoggingIn(false);
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center relative bg-gray-100">
-
       <div className="bg-white shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4 w-full max-w-md">
         <h1 className="font-heading text-3xl font-bold text-center mb-8 text-primary">로그인</h1>
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
@@ -58,7 +78,7 @@ const LoginPage = () => {
             placeholder="email@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            disabled={isLoading}
+            disabled={isLoggingIn}
           />
         </div>
         <div className="mb-6">
@@ -73,7 +93,7 @@ const LoginPage = () => {
               placeholder="******************"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              disabled={isLoading}
+              disabled={isLoggingIn}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   handleLogin();
@@ -84,7 +104,7 @@ const LoginPage = () => {
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700 disabled:cursor-not-allowed"
-              disabled={isLoading}
+              disabled={isLoggingIn}
             >
               {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
             </button>
@@ -95,9 +115,9 @@ const LoginPage = () => {
             className="bg-accent hover:bg-opacity-80 text-white font-bold py-3 px-5 rounded focus:outline-none focus:shadow-outline w-full disabled:bg-gray-400"
             type="button"
             onClick={handleLogin}
-            disabled={isLoading}
+            disabled={isLoggingIn}
           >
-            {isLoading ? '로그인 중...' : '로그인'}
+            {isLoggingIn ? '로그인 중...' : '로그인'}
           </button>
         </div>
         <div className="text-center">

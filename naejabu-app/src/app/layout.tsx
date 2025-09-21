@@ -5,6 +5,7 @@ import { ReactNode } from 'react';
 import { LoadingProvider, useLoading } from '../context/LoadingContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import GlobalHeader from '../components/GlobalHeader';
+import { AuthProvider } from '../context/AuthContext';
 import { Noto_Sans_KR } from 'next/font/google';
 
 const notoSansKr = Noto_Sans_KR({
@@ -32,9 +33,11 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${notoSansKr.variable} font-sans bg-secondary text-text`}>
-        <LoadingProvider>
-            <AppContent>{children}</AppContent>
-        </LoadingProvider>
+        <AuthProvider>
+          <LoadingProvider>
+              <AppContent>{children}</AppContent>
+          </LoadingProvider>
+        </AuthProvider>
       </body>
     </html>
   );

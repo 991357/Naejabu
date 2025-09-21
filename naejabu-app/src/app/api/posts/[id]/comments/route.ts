@@ -35,8 +35,8 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   }
 
   try {
-    // First, check the post category
-    const post = db.prepare('SELECT category FROM posts WHERE id = ?').get(postId) as any;
+    // First, check the post category and get author
+    const post = db.prepare('SELECT user_id, category FROM posts WHERE id = ?').get(postId) as { user_id: number, category: string };
     if (!post) {
         return NextResponse.json({ message: 'Post not found' }, { status: 404 });
     }
@@ -51,6 +51,25 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     ).run(postId, userId, content);
 
     const newCommentId = result.lastInsertRowid;
+
+    // Notify post author about the new comment
+    console.log(`Checking to notify. Post author: ${post.user_id}, Commenter: ${userId}`);
+    if (post.user_id !== userId) {
+        console.log('Condition met. Creating notification...');
+        db.prepare(
+            'INSERT INTO notifications (user_id, type, title, message, link) VALUES (?, ?, ?, ?, ?)'
+        ).run(
+            post.user_id,
+            'comment',
+            '새로운 댓글 알림',
+            `회원님의 게시글에 새로운 댓글이 달렸습니다.`,
+            `/community/post/${postId}`
+        );
+        console.log('Notification created.');
+    } else {
+        console.log('Condition not met. User commented on their own post.');
+    }
+
     const newComment = db.prepare(
         `SELECT c.id, c.content, c.created_at, u.nickname as author_name, u.is_admin as author_is_admin, c.user_id
          FROM comments c
