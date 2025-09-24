@@ -44,10 +44,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
 }
 
-// Transaction for updating a resume and its questions
+// Transaction for updating a resume and its questions, including versioning
 const updateResumeWithQuestions = db.transaction((data) => {
     const { resumeId, userId, company_name, deadline, questions, now } = data;
 
+    // 1. Update the main resume entry
     const updateResumeStmt = db.prepare(
         'UPDATE resumes SET company_name = ?, deadline = ?, updated_at = ? WHERE id = ? AND user_id = ?'
     );
@@ -57,7 +58,22 @@ const updateResumeWithQuestions = db.transaction((data) => {
         throw new Error('Resume not found or access denied');
     }
 
-    // Delete old questions and insert new ones
+    // 2. Create a new version entry
+    const createVersionStmt = db.prepare('INSERT INTO resume_versions (resume_id, created_at) VALUES (?, ?)');
+    const versionResult = createVersionStmt.run(resumeId, now);
+    const versionId = versionResult.lastInsertRowid;
+
+    // 3. Insert all current questions as a snapshot for the new version
+    if (questions && questions.length > 0) {
+        const insertQuestionVersionStmt = db.prepare(
+            'INSERT INTO resume_question_versions (version_id, question_text, answer_text, char_limit) VALUES (?, ?, ?, ?)'
+        );
+        for (const q of questions) {
+            insertQuestionVersionStmt.run(versionId, q.question_text, q.answer_text || '', q.char_limit || 1000);
+        }
+    }
+
+    // 4. Update the "live" questions
     const deleteQuestionsStmt = db.prepare('DELETE FROM resume_questions WHERE resume_id = ?');
     deleteQuestionsStmt.run(resumeId);
 
@@ -69,6 +85,7 @@ const updateResumeWithQuestions = db.transaction((data) => {
             insertQuestionStmt.run(resumeId, q.question_text, q.answer_text || '', q.char_limit || 1000);
         }
     }
+    
     return { id: resumeId }; 
 });
 

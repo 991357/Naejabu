@@ -139,6 +139,28 @@ CREATE TABLE IF NOT EXISTS notifications (
 db.exec(createUsersTable);
 db.exec(createResumesTable);
 db.exec(createResumeQuestionsTable);
+
+const createResumeVersionsTable = `
+CREATE TABLE IF NOT EXISTS resume_versions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  resume_id INTEGER NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (resume_id) REFERENCES resumes (id) ON DELETE CASCADE
+);
+`;
+
+const createResumeQuestionVersionsTable = `
+CREATE TABLE IF NOT EXISTS resume_question_versions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  version_id INTEGER NOT NULL,
+  question_text TEXT NOT NULL,
+  answer_text TEXT,
+  char_limit INTEGER NOT NULL DEFAULT 1000,
+  FOREIGN KEY (version_id) REFERENCES resume_versions (id) ON DELETE CASCADE
+);
+`;
+db.exec(createResumeVersionsTable);
+db.exec(createResumeQuestionVersionsTable);
 db.exec(createEmailVerificationsTable);
 db.exec(createPostsTable);
 db.exec(createCommentsTable);

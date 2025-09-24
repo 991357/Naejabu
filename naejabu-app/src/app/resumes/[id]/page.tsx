@@ -8,17 +8,9 @@ import Modal from '../../../components/Modal';
 import EditResumeModal from '../../../components/EditResumeModal';
 import SpellCheckModal from '../../../components/SpellCheckModal';
 import AlertModal from '../../../components/AlertModal';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import ResumeEditor from '../../../components/ResumeEditor'; // ReactQuill 대신 ResumeEditor를 임포트
 
-// Helper to get text length from HTML
-const getTextLength = (html: string) => {
-  if (typeof window === 'undefined') {
-    return 0;
-  }
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  return doc.body.textContent?.trim().length || 0;
-};
+import VersionHistoryModal from '../../../components/VersionHistoryModal';
 
 const getAuthHeaders = () => {
     const token = localStorage.getItem('token');
@@ -44,6 +36,7 @@ const ResumeDetailPage = () => {
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [alertModalOpen, setAlertModalOpen] = useState(false);
   const [alertModalMessage, setAlertModalMessage] = useState('');
+  const [showVersionModal, setShowVersionModal] = useState(false);
 
   const params = useParams();
   const router = useRouter();
@@ -145,23 +138,50 @@ const ResumeDetailPage = () => {
 
     if (response.ok) {
       setIsDirty(false);
-      openAlertModal('저장되었습니다.');
+      openAlertModal('저장되었습니다. 새로운 버전이 생성되었습니다.');
+      // Optionally re-fetch versions if the modal is open, but for now just a message is fine.
     } else {
       openAlertModal('저장에 실패했습니다.');
     }
   };
 
   const handleSaveEdit = async (updatedData: any) => {
+    // 현재 answers 상태를 보존하기 위해 PUT 요청 body에 answers를 포함시킵니다.
+    const questionsWithCurrentAnswers = updatedData.questions.map((q: any) => {
+      const existingAnswer = answers[q.id];
+      return {
+        ...q,
+        // 새 질문이거나 기존 질문에 답변이 없는 경우를 처리합니다.
+        answer_text: existingAnswer || ''
+      };
+    });
+
+    const payload = {
+      ...updatedData,
+      questions: questionsWithCurrentAnswers,
+    };
+
     const response = await fetch(`/api/resumes/${id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
-        body: JSON.stringify(updatedData),
+        body: JSON.stringify(payload),
     });
 
     if (response.ok) {
-        fetchResumeDetail();
+        const newResumeData = await response.json();
+        // 서버로부터 받은 최신 데이터로 resume 상태를 업데이트합니다.
+        // 이렇게 하면 새로 생성된 질문의 ID도 정확히 반영됩니다.
+        setResume(newResumeData);
+        
+        // answers 상태도 서버 응답 기준으로 업데이트하여 일관성을 유지합니다.
+        const newAnswers: { [key: number]: string } = {};
+        newResumeData.questions.forEach((q: any) => {
+          newAnswers[q.id] = q.answer_text || '';
+        });
+        setAnswers(newAnswers);
+
         setIsEditModalOpen(false);
-        openAlertModal('수정되었습니다.');
+        openAlertModal('수정되었습니다. 새로운 버전이 생성되었습니다.');
     } else {
         openAlertModal('수정에 실패했습니다.');
     }
@@ -206,8 +226,31 @@ const ResumeDetailPage = () => {
     }
   };
 
+  const handleRestoreVersion = (restoredQuestions: any[]) => {
+    // The questions from the version might not match the current questions.
+    // We need to update the resume's questions and the answers state.
+    const newAnswers: { [key: number]: string } = {};
+    const newQuestions = restoredQuestions.map((q, index) => {
+      // The old questions don't have a real ID in the context of the current resume,
+      // so we use the existing question ID if available at the same index, or a temporary one.
+      const existingQuestion = resume.questions[index];
+      const id = existingQuestion ? existingQuestion.id : `temp-${index}`;
+      newAnswers[id] = q.answer_text || '';
+      return {
+        ...q,
+        id: id, 
+      };
+    });
+
+    // We need to create a new set of questions for the resume state
+    setResume((prev: any) => ({ ...prev, questions: newQuestions }));
+    setAnswers(newAnswers);
+    setIsDirty(true);
+    openAlertModal('선택한 버전으로 복원되었습니다. 저장하여 새 버전으로 만드세요.');
+  };
+
   if (isLoading) {
-    return <div className="flex justify-center items-center min-h-screen"><p>Loading...</p></div>;
+    return <div className="flex justify-center items-center min-h-screen"><p className="dark:text-white">Loading...</p></div>;
   }
 
   if (error) {
@@ -215,19 +258,22 @@ const ResumeDetailPage = () => {
   }
 
   if (!resume) {
-    return <div className="flex justify-center items-center min-h-screen"><p>Resume not found.</p></div>;
+    return <div className="flex justify-center items-center min-h-screen"><p className="dark:text-white">Resume not found.</p></div>;
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen dark:bg-gray-900">
       <AlertModal isOpen={alertModalOpen} onClose={() => setAlertModalOpen(false)} message={alertModalMessage} />
       <main className="container mx-auto p-8">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="font-heading text-4xl font-bold text-primary">{resume.company_name}</h1>
+            <h1 className="font-heading text-4xl font-bold text-primary dark:text-blue-400">{resume.company_name}</h1>
             <p className="text-red-500 font-semibold mt-2 text-xl">{timeLeft}</p>
           </div>
           <div className="flex gap-4">
+            <button onClick={() => setShowVersionModal(true)} className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300 transform hover:scale-105">
+                버전
+            </button>
             <button onClick={() => setIsEditModalOpen(true)} className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-300 transform hover:scale-105">
                 수정하기
             </button>
@@ -241,25 +287,24 @@ const ResumeDetailPage = () => {
           {resume.questions.map((q: any, index: number) => (
             <div
               key={q.id}
-              className="bg-white p-6 rounded-lg shadow-md animate-fade-in-down"
+              className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md animate-fade-in-down"
               style={{ animationDelay: `${index * 100}ms` }}
             >
-              <label className="block font-heading text-primary text-2xl font-bold mb-4">{index + 1}. {q.question_text}</label>
-              <ReactQuill
-                theme="snow"
-                className="bg-white"
+              <label className="block font-heading text-primary dark:text-blue-400 text-2xl font-bold mb-4">{index + 1}. {q.question_text}</label>
+              <ResumeEditor
                 value={answers[q.id] || ''}
                 onChange={(value) => handleAnswerChange(q.id, value)}
+                placeholder={`${q.char_limit || 1000}자 이내로 작성해주세요.`}
+                maxLength={q.char_limit || 1000}
               />
-              <div className="flex justify-between items-center mt-2 text-sm text-gray-500">
+              <div className="flex justify-end items-center mt-2 text-sm text-gray-500">
                 <button
                   onClick={() => handleSpellCheck(q.id)}
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-3 rounded text-xs"
+                  className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-bold py-1 px-3 rounded text-xs"
                   disabled={spellCheckLoading[q.id]}
                 >
                   {spellCheckLoading[q.id] ? '검사 중...' : '맞춤법 검사'}
                 </button>
-                <span>{getTextLength(answers[q.id] || '')} / {q.char_limit || 1000} 자</span>
               </div>
             </div>
           ))}
@@ -282,13 +327,13 @@ const ResumeDetailPage = () => {
         />
       )}
       <Modal isOpen={showUnsavedChangesModal} onClose={() => setShowUnsavedChangesModal(false)}>
-        <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4">저장하지 않은 변경사항</h2>
-            <p>저장하지 않은 변경사항이 있습니다. 페이지를 벗어나시겠습니까?</p>
+        <div className="p-6 bg-white dark:bg-gray-800 rounded-lg">
+            <h2 className="text-2xl font-bold mb-4 dark:text-white">저장하지 않은 변경사항</h2>
+            <p className="dark:text-gray-300">저장하지 않은 변경사항이 있습니다. 페이지를 벗어나시겠습니까?</p>
             <div className="flex justify-end mt-6">
                 <button
                     onClick={() => setShowUnsavedChangesModal(false)}
-                    className="mr-2 px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+                    className="mr-2 px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
                 >
                     머무르기
                 </button>
@@ -301,6 +346,14 @@ const ResumeDetailPage = () => {
             </div>
         </div>
       </Modal>
+      {showVersionModal && (
+        <VersionHistoryModal
+          isOpen={showVersionModal}
+          onClose={() => setShowVersionModal(false)}
+          resumeId={parseInt(id as string, 10)}
+          onRestore={handleRestoreVersion}
+        />
+      )}
     </div>
   );
 };
