@@ -1,10 +1,14 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-
+import React, { useState, useEffect } from 'react';
+import useAuth from '../../hooks/useAuth';
 import withAuth from '../../components/withAuth';
+import PasswordChangePopup from '../../components/PasswordChangePopup';
+import { useLoading } from '../../context/LoadingContext';
+import AlertModal from '../../components/AlertModal';
+import { useTheme } from '../../context/ThemeContext';
 import RecommendationModal from '../../components/RecommendationModal';
-import Modal from '../../components/Modal'; // Import Modal component
+import Modal from '../../components/Modal';
 
 const getAuthHeaders = () => {
     const token = localStorage.getItem('token');
@@ -22,289 +26,239 @@ const getRandomSuggestions = (sourceArray: string[], count: number): string[] =>
   return shuffled.slice(0, count);
 };
 
-const MyPage = () => {
-  const [user, setUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  const [name, setName] = useState('');
-  const [nickname, setNickname] = useState('');
-  const [englishName, setEnglishName] = useState('');
-  const [hanjaName, setHanjaName] = useState('');
-  const [birthdate, setBirthdate] = useState('');
-  const [hobby, setHobby] = useState('');
-  const [specialty, setSpecialty] = useState('');
-  const [motto, setMotto] = useState('');
-  const [notification, setNotification] = useState({ message: '', type: '' });
-  const [nicknameNotification, setNicknameNotification] = useState({ message: '', type: '' });
+function MyPage() {
+    const { user, changeNickname, logout, fetchUser } = useAuth();
+    const { showLoading, hideLoading } = useLoading();
+    const { theme, toggleTheme } = useTheme();
 
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [passwordNotification, setPasswordNotification] = useState({ message: '', type: '' });
+    const [newNickname, setNewNickname] = useState('');
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
+    const [alert, setAlert] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  const [isRecModalOpen, setIsRecModalOpen] = useState(false);
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [recType, setRecType] = useState<'hobby' | 'specialty' | null>(null);
-  const [currentSuggestions, setCurrentSuggestions] = useState<string[]>([]);
+    const [englishName, setEnglishName] = useState('');
+    const [hanjaName, setHanjaName] = useState('');
+    const [birthdate, setBirthdate] = useState('');
+    const [hobbies, setHobbies] = useState<string[]>([]);
+    const [specialties, setSpecialties] = useState<string[]>([]);
+    const [motto, setMotto] = useState('');
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch('/api/auth/me', { headers: getAuthHeaders() });
-        if (response.ok) {
-          const userData = await response.json();
-          setUser(userData);
-          setName(userData.name || '');
-          setNickname(userData.nickname || '');
-          setEnglishName(userData.english_name || '');
-          setHanjaName(userData.hanja_name || '');
-          setBirthdate(userData.birthdate || '');
-          setHobby(userData.hobby || '');
-          setSpecialty(userData.specialty || '');
-          setMotto(userData.motto || '');
+    const [isHobbyModalOpen, setIsHobbyModalOpen] = useState(false);
+    const [isSpecialtyModalOpen, setIsSpecialtyModalOpen] = useState(false);
+    const [hobbySuggestions, setHobbySuggestions] = useState<string[]>([]);
+    const [specialtySuggestions, setSpecialtySuggestions] = useState<string[]>([]);
+
+    useEffect(() => {
+        if (user) {
+            setNewNickname(user.nickname || '');
+            setEnglishName(user.english_name || '');
+            setHanjaName(user.hanja_name || '');
+            setBirthdate(user.birthdate || '');
+            setHobbies(user.hobby ? user.hobby.split(', ') : []);
+            setSpecialties(user.specialty ? user.specialty.split(', ') : []);
+            setMotto(user.motto || '');
         }
-      } catch (error) {
-        console.error('Failed to fetch user data', error);
-      } finally {
-        setIsLoading(false);
-      }
+    }, [user]);
+
+    const handleNicknameChange = async () => {
+        if (!newNickname.trim()) {
+            setAlert({ message: '새 닉네임을 입력해주세요.', type: 'error' });
+            return;
+        }
+        showLoading();
+        try {
+            await changeNickname(newNickname);
+            setAlert({ message: '닉네임이 성공적으로 변경되었습니다.', type: 'success' });
+        } catch (error) {
+            setAlert({ message: '닉네임 변경에 실패했습니다.', type: 'error' });
+        } finally {
+            hideLoading();
+        }
     };
-    fetchUserData();
-  }, []);
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setNotification({ message: '', type: '' });
-    try {
-      const response = await fetch('/api/auth/me', {
-        method: 'PATCH',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ name, english_name: englishName, hanja_name: hanjaName, birthdate, hobby, specialty, motto }),
-      });
-      if (response.ok) {
-        const updatedUser = await response.json();
-        setUser(updatedUser);
-        setNotification({ message: '성공적으로 저장되었습니다!', type: 'success' });
-      } else {
-        throw new Error('Failed to save data');
-      }
-    } catch (error) {
-      console.error('Failed to save user data', error);
-      setNotification({ message: '저장에 실패했습니다. 다시 시도해주세요.', type: 'error' });
-    }
-  };
+    const handleUpdateProfile = async () => {
+        showLoading();
+        try {
+            const response = await fetch('/api/auth/me', {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({
+                    english_name: englishName,
+                    hanja_name: hanjaName,
+                    birthdate,
+                    hobby: hobbies.join(', '),
+                    specialty: specialties.join(', '),
+                    motto,
+                }),
+            });
+            if (!response.ok) throw new Error('프로필 업데이트에 실패했습니다.');
+            await fetchUser(); // Re-fetch user data to update context
+            setAlert({ message: '프로필이 성공적으로 업데이트되었습니다.', type: 'success' });
+        } catch (error: any) {
+            setAlert({ message: error.message || '프로필 업데이트 중 오류가 발생했습니다.', type: 'error' });
+        } finally {
+            hideLoading();
+        }
+    };
 
-  const handleNicknameChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setNicknameNotification({ message: '', type: '' });
-    try {
-      const response = await fetch('/api/auth/change-nickname', {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ nickname }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        setUser({ ...user, nickname });
-        setNicknameNotification({ message: '닉네임이 성공적으로 변경되었습니다!', type: 'success' });
-      } else {
-        throw new Error(data.message || 'Failed to change nickname');
-      }
-    } catch (error: any) {
-      setNicknameNotification({ message: error.message || '닉네임 변경에 실패했습니다.', type: 'error' });
-    }
-  };
+    const handlePasswordChangeSuccess = () => {
+        setAlert({ message: '비밀번호가 성공적으로 변경되었습니다.', type: 'success' });
+    };
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPasswordNotification({ message: '', type: '' });
+    const openHobbyModal = () => {
+        setHobbySuggestions(getRandomSuggestions(hobbyMasterList, 10));
+        setIsHobbyModalOpen(true);
+    };
 
-    if (newPassword !== confirmPassword) {
-      setPasswordNotification({ message: '새 비밀번호가 일치하지 않습니다.', type: 'error' });
-      return;
-    }
-    if (newPassword.length < 6) {
-        setPasswordNotification({ message: '비밀번호는 6자 이상이어야 합니다.', type: 'error' });
-        return;
+    const openSpecialtyModal = () => {
+        setSpecialtySuggestions(getRandomSuggestions(specialtyMasterList, 10));
+        setIsSpecialtyModalOpen(true);
+    };
+
+    if (!user) {
+        return <div className="flex justify-center items-center h-screen dark:text-white">로그인 정보를 불러오는 중입니다...</div>;
     }
 
-    try {
-      const response = await fetch('/api/auth/change-password', {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ currentPassword, newPassword }),
-      });
+    return (
+        <div className="container mx-auto p-4 max-w-4xl">
+            <h1 className="text-3xl font-bold mb-6 dark:text-white">마이페이지</h1>
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setPasswordNotification({ message: '비밀번호가 성공적으로 변경되었습니다!', type: 'success' });
-        setCurrentPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
-        setTimeout(() => {
-            setIsPasswordModalOpen(false);
-            setPasswordNotification({ message: '', type: '' });
-        }, 2000);
-      } else {
-        throw new Error(data.message || 'Failed to change password');
-      }
-    } catch (error: any) {
-      setPasswordNotification({ message: error.message || '비밀번호 변경에 실패했습니다. 다시 시도해주세요.', type: 'error' });
-    }
-  };
-
-  const handleOpenRecs = (type: 'hobby' | 'specialty') => {
-    setRecType(type);
-    if (type === 'hobby') {
-      setCurrentSuggestions(getRandomSuggestions(hobbyMasterList, 10));
-    } else {
-      setCurrentSuggestions(getRandomSuggestions(specialtyMasterList, 10));
-    }
-    setIsRecModalOpen(true);
-  };
-
-  const handleRefreshSuggestions = () => {
-    if (recType === 'hobby') {
-      setCurrentSuggestions(getRandomSuggestions(hobbyMasterList, 10));
-    } else if (recType === 'specialty') {
-      setCurrentSuggestions(getRandomSuggestions(specialtyMasterList, 10));
-    }
-  };
-
-  const handleSelectSuggestion = (suggestion: string) => {
-    if (recType === 'hobby') {
-      setHobby(suggestion);
-    } else if (recType === 'specialty') {
-      setSpecialty(suggestion);
-    }
-  };
-
-  if (isLoading) {
-    return <div className="flex justify-center items-center min-h-screen"><p>Loading...</p></div>;
-  }
-
-  return (
-    <>
-      <div className="min-h-screen bg-gray-50">
-        
-        <main className="container mx-auto p-8">
-          <h1 className="font-heading text-4xl font-bold text-primary mb-8">마이페이지</h1>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="md:col-span-1">
-              <div className="bg-white shadow-lg rounded-lg p-6">
-                <h2 className="font-heading text-2xl font-bold text-primary border-b pb-3">기본 정보</h2>
-                <div className="mt-4 space-y-2">
-                  <p><span className="font-semibold">이름:</span> {user?.name}</p>
-                  <p><span className="font-semibold">닉네임:</span> {user?.nickname || '설정되지 않음'}</p>
-                  <p><span className="font-semibold">이메일:</span> {user?.email}</p>
-                  <p><span className="font-semibold">역할:</span> {user?.role === 'mentor' ? '멘토' : '멘티'}</p>
+            {/* User Info Section */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-6">
+                <h2 className="text-xl font-semibold mb-4 dark:text-gray-100">회원 정보</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Email ID */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">아이디 (이메일)</label>
+                        <p className="mt-1 text-lg dark:text-gray-200">{user.email}</p>
+                    </div>
+                    {/* Role */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">역할</label>
+                        <p className="mt-1 text-lg dark:text-gray-200">{user.role === 'mentor' ? '멘토' : '멘티'}</p>
+                    </div>
+                    {/* Nickname */}
+                    <div>
+                        <label htmlFor="nickname" className="block text-sm font-medium text-gray-700 dark:text-gray-300">닉네임</label>
+                        <div className="flex items-center space-x-2 mt-1">
+                            <input
+                                type="text"
+                                id="nickname"
+                                value={newNickname}
+                                onChange={(e) => setNewNickname(e.target.value)}
+                                placeholder={user.nickname}
+                                className="flex-grow p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            />
+                            <button
+                                onClick={handleNicknameChange}
+                                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                            >
+                                변경
+                            </button>
+                        </div>
+                    </div>
+                    {/* English Name */}
+                    <div>
+                        <label htmlFor="englishName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">영문 이름</label>
+                        <input type="text" id="englishName" value={englishName} onChange={(e) => setEnglishName(e.target.value)} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                    </div>
+                    {/* Hanja Name */}
+                    <div>
+                        <label htmlFor="hanjaName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">한자 이름</label>
+                        <input type="text" id="hanjaName" value={hanjaName} onChange={(e) => setHanjaName(e.target.value)} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                    </div>
+                    {/* Birthdate */}
+                    <div>
+                        <label htmlFor="birthdate" className="block text-sm font-medium text-gray-700 dark:text-gray-300">생년월일</label>
+                        <input type="date" id="birthdate" value={birthdate} onChange={(e) => setBirthdate(e.target.value)} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                    </div>
+                    {/* Motto */}
+                    <div>
+                        <label htmlFor="motto" className="block text-sm font-medium text-gray-700 dark:text-gray-300">좌우명</label>
+                        <input type="text" id="motto" value={motto} onChange={(e) => setMotto(e.target.value)} className="mt-1 w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                    </div>
+                    {/* Hobbies */}
+                    <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">취미</label>
+                        <div className="flex items-center gap-2 mt-1">
+                            <input type="text" value={hobbies.join(', ')} readOnly className="flex-grow p-2 border rounded-md bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                            <button onClick={openHobbyModal} className="px-4 py-2 bg-gray-200 dark:bg-gray-600 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500">추천</button>
+                        </div>
+                    </div>
+                    {/* Specialties */}
+                    <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">특기</label>
+                        <div className="flex items-center gap-2 mt-1">
+                            <input type="text" value={specialties.join(', ')} readOnly className="flex-grow p-2 border rounded-md bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                            <button onClick={openSpecialtyModal} className="px-4 py-2 bg-gray-200 dark:bg-gray-600 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500">추천</button>
+                        </div>
+                    </div>
                 </div>
-                <div className="mt-6">
-                    <button 
-                        onClick={() => setIsPasswordModalOpen(true)}
-                        className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors"
-                    >
-                        비밀번호 변경
+                <div className="mt-6 text-right">
+                    <button onClick={handleUpdateProfile} className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
+                        프로필 저장
                     </button>
                 </div>
-              </div>
             </div>
-            <div className="md:col-span-2">
-              <form onSubmit={handleNicknameChange} className="bg-white shadow-lg rounded-lg p-6 mb-8">
-                <h2 className="font-heading text-2xl font-bold text-primary border-b pb-3 mb-6">닉네임 변경</h2>
-                <div>
-                  <label className="block text-gray-800 text-lg font-semibold mb-2" htmlFor="nickname">새 닉네임</label>
-                  <div className="flex items-center gap-4">
-                    <input id="nickname" type="text" value={nickname} onChange={(e) => setNickname(e.target.value)} className="shadow-md appearance-none border rounded-lg w-full py-3 px-4 text-gray-700" placeholder="2자 이상, 비속어 제외" />
-                    <button type="submit" className="bg-accent hover:bg-opacity-90 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 whitespace-nowrap">변경</button>
-                  </div>
-                  {nicknameNotification.message && <p className={`mt-2 text-sm ${nicknameNotification.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>{nicknameNotification.message}</p>}
+            
+            {/* Theme Settings Section */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-6">
+                <h2 className="text-xl font-semibold mb-4 dark:text-gray-100">테마 설정</h2>
+                <div className="flex items-center justify-between">
+                    <span className="text-gray-700 dark:text-gray-300">다크 모드</span>
+                    <button
+                        onClick={toggleTheme}
+                        className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors duration-300 focus:outline-none ${theme === 'dark' ? 'bg-blue-500' : 'bg-gray-300'}`}
+                    >
+                        <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform duration-300 ${theme === 'dark' ? 'translate-x-6' : 'translate-x-1'}`} />
+                    </button>
                 </div>
-              </form>
-              <form onSubmit={handleSave} className="bg-white shadow-lg rounded-lg p-6">
-                <h2 className="font-heading text-2xl font-bold text-primary border-b pb-3 mb-6">내 정보 관리</h2>
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-gray-800 text-lg font-semibold mb-2" htmlFor="englishName">영문 이름</label>
-                      <input id="englishName" type="text" value={englishName} onChange={(e) => setEnglishName(e.target.value)} className="shadow-md appearance-none border rounded-lg w-full py-3 px-4 text-gray-700" placeholder="예: Gildong Hong" />
-                    </div>
-                    <div>
-                      <label className="block text-gray-800 text-lg font-semibold mb-2" htmlFor="hanjaName">한자 이름</label>
-                      <input id="hanjaName" type="text" value={hanjaName} onChange={(e) => setHanjaName(e.target.value)} className="shadow-md appearance-none border rounded-lg w-full py-3 px-4 text-gray-700" placeholder="예: 洪吉童" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-gray-800 text-lg font-semibold mb-2" htmlFor="birthdate">생년월일</label>
-                    <input id="birthdate" type="date" value={birthdate} onChange={(e) => setBirthdate(e.target.value)} className="shadow-md appearance-none border rounded-lg w-full py-3 px-4 text-gray-700" />
-                  </div>
-                  <hr/>
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <label className="block text-gray-800 text-lg font-semibold" htmlFor="hobby">취미</label>
-                      <button type="button" onClick={() => handleOpenRecs('hobby')} className="text-sm text-accent font-semibold hover:underline">추천받기</button>
-                    </div>
-                    <input id="hobby" type="text" value={hobby} onChange={(e) => setHobby(e.target.value)} className="shadow-md appearance-none border rounded-lg w-full py-3 px-4 text-gray-700" placeholder="예: 독서, 영화 감상" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <label className="block text-gray-800 text-lg font-semibold" htmlFor="specialty">특기</label>
-                      <button type="button" onClick={() => handleOpenRecs('specialty')} className="text-sm text-accent font-semibold hover:underline">추천받기</button>
-                    </div>
-                    <input id="specialty" type="text" value={specialty} onChange={(e) => setSpecialty(e.target.value)} className="shadow-md appearance-none border rounded-lg w-full py-3 px-4 text-gray-700" placeholder="예: 데이터 분석, 문제 해결" />
-                  </div>
-                  <div>
-                    <label className="block text-gray-800 text-lg font-semibold mb-2" htmlFor="motto">좌우명</label>
-                    <input id="motto" type="text" value={motto} onChange={(e) => setMotto(e.target.value)} className="shadow-md appearance-none border rounded-lg w-full py-3 px-4 text-gray-700" placeholder="예: 오늘을 즐기자" />
-                  </div>
-                </div>
-                <div className="mt-8 flex justify-end items-center">
-                  {notification.message && <p className={`mr-4 text-sm ${notification.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>{notification.message}</p>}
-                  <button type="submit" className="bg-accent hover:bg-opacity-90 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105">저장하기</button>
-                </div>
-              </form>
             </div>
-          </div>
-        </main>
-      </div>
 
-      {/* Password Change Modal */}
-      <Modal isOpen={isPasswordModalOpen} onClose={() => setIsPasswordModalOpen(false)}>
-        <form onSubmit={handlePasswordChange} className="bg-white rounded-lg p-6 w-full max-w-lg">
-            <h2 className="font-heading text-2xl font-bold text-primary border-b pb-3 mb-6">비밀번호 변경</h2>
-            <div className="space-y-6">
-                <div>
-                    <label className="block text-gray-800 text-lg font-semibold mb-2" htmlFor="currentPassword">현재 비밀번호</label>
-                    <input id="currentPassword" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="shadow-md appearance-none border rounded-lg w-full py-3 px-4 text-gray-700" required />
-                </div>
-                <div>
-                    <label className="block text-gray-800 text-lg font-semibold mb-2" htmlFor="newPassword">새 비밀번호</label>
-                    <input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="shadow-md appearance-none border rounded-lg w-full py-3 px-4 text-gray-700" required />
-                </div>
-                <div>
-                    <label className="block text-gray-800 text-lg font-semibold mb-2" htmlFor="confirmPassword">새 비밀번호 확인</label>
-                    <input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="shadow-md appearance-none border rounded-lg w-full py-3 px-4 text-gray-700" required />
+            {/* Actions Section */}
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                <div className="flex justify-between items-center">
+                    <div>
+                        <h3 className="text-lg font-medium dark:text-gray-100">계정 관리</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">비밀번호 변경 또는 로그아웃</p>
+                    </div>
+                    <div className="flex gap-4">
+                        <button
+                            onClick={() => setIsPopupOpen(true)}
+                            className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
+                        >
+                            비밀번호 변경
+                        </button>
+                        <button
+                            onClick={logout}
+                            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                        >
+                            로그아웃
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div className="mt-8 flex justify-end items-center">
-                {passwordNotification.message && <p className={`mr-4 text-sm ${passwordNotification.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>{passwordNotification.message}</p>}
-                <button type="submit" className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300">변경하기</button>
-            </div>
-        </form>
-      </Modal>
 
-      <RecommendationModal
-        isOpen={isRecModalOpen}
-        onClose={() => setIsRecModalOpen(false)}
-        title={recType === 'hobby' ? '취미' : '특기'}
-        suggestions={currentSuggestions}
-        onSelect={handleSelectSuggestion}
-        onRefresh={handleRefreshSuggestions}
-      />
-    </>
-  );
-};
+            {/* Modals */}
+            {isPopupOpen && <PasswordChangePopup onClose={() => setIsPopupOpen(false)} onSuccess={handlePasswordChangeSuccess} />}
+            {alert && <AlertModal message={alert.message} type={alert.type} onClose={() => setAlert(null)} />}
+            <RecommendationModal
+                isOpen={isHobbyModalOpen}
+                onClose={() => setIsHobbyModalOpen(false)}
+                title="취미 추천"
+                suggestions={hobbySuggestions}
+                selectedItems={hobbies}
+                onSelect={(item) => setHobbies(prev => prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item])}
+            />
+            <RecommendationModal
+                isOpen={isSpecialtyModalOpen}
+                onClose={() => setIsSpecialtyModalOpen(false)}
+                title="특기 추천"
+                suggestions={specialtySuggestions}
+                selectedItems={specialties}
+                onSelect={(item) => setSpecialties(prev => prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item])}
+            />
+        </div>
+    );
+}
 
 export default withAuth(MyPage);

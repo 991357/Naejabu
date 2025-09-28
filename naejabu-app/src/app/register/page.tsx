@@ -109,17 +109,17 @@ const RegisterPage = () => {
   const isRegisterDisabled = !isVerified || !password || !passwordConfirmation || password !== passwordConfirmation;
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center relative bg-gray-50">
+    <div className="min-h-screen flex flex-col justify-center items-center relative bg-gray-50 dark:bg-gray-900">
 
-      <div className="bg-white shadow-xl rounded-lg px-8 pt-6 pb-8 mb-4 w-full max-w-md">
-        <h1 className="font-heading text-3xl font-bold text-center mb-8 text-primary">회원가입</h1>
+      <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg px-8 pt-6 pb-8 mb-4 w-full max-w-md">
+        <h1 className="font-heading text-3xl font-bold text-center mb-8 text-primary dark:text-blue-400">회원가입</h1>
         {error && <p className="text-red-500 text-center mb-4 font-semibold">{error}</p>}
         {success && <p className="text-green-500 text-center mb-4 font-semibold">{success}</p>}
         
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">이름</label>
+          <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="name">이름</label>
           <input 
-            className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-accent"
+            className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 leading-tight focus:outline-none focus:ring-2 focus:ring-accent"
             id="name" type="text" placeholder="홍길동"
             value={name} onChange={(e) => setName(e.target.value)}
             disabled={isVerified}
@@ -127,9 +127,9 @@ const RegisterPage = () => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="nickname">닉네임</label>
+          <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="nickname">닉네임</label>
           <input 
-            className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-accent"
+            className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 leading-tight focus:outline-none focus:ring-2 focus:ring-accent"
             id="nickname" type="text" placeholder="사용할 닉네임을 입력하세요"
             value={nickname} onChange={(e) => setNickname(e.target.value)}
             disabled={isVerified}
@@ -137,10 +137,10 @@ const RegisterPage = () => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">이메일</label>
+          <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="email">이메일</label>
           <div className="flex items-center space-x-2">
             <input 
-              className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-accent"
+              className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 leading-tight focus:outline-none focus:ring-2 focus:ring-accent"
               id="email" type="email" placeholder="email@example.com"
               value={email} onChange={(e) => setEmail(e.target.value)}
               disabled={isEmailSent}
@@ -157,10 +157,10 @@ const RegisterPage = () => {
 
         {isEmailSent && !isVerified && (
           <div className="mb-4 transition-all duration-500 ease-in-out">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="code">인증 코드</label>
+            <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="code">인증 코드</label>
             <div className="flex items-center space-x-2">
               <input 
-                className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-accent"
+                className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 leading-tight focus:outline-none focus:ring-2 focus:ring-accent"
                 id="code" type="text" placeholder="6자리 코드 입력"
                 value={verificationCode} onChange={(e) => setVerificationCode(e.target.value)}
               />
@@ -178,17 +178,17 @@ const RegisterPage = () => {
         {isVerified && (
           <div className="transition-all duration-500 ease-in-out">
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">비밀번호</label>
+              <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="password">비밀번호</label>
               <input 
-                className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-accent"
+                className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 leading-tight focus:outline-none focus:ring-2 focus:ring-accent"
                 id="password" type="password" placeholder="******************"
                 value={password} onChange={(e) => setPassword(e.target.value)}
               />
             </div>
             <div className="mb-6">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="passwordConfirmation">비밀번호 확인</label>
+              <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="passwordConfirmation">비밀번호 확인</label>
               <input 
-                className={`shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 mb-3 leading-tight focus:outline-none focus:ring-2 ${password !== passwordConfirmation && passwordConfirmation ? 'border-red-500 focus:ring-red-500' : 'focus:ring-accent'}`}
+                className={`shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 mb-3 leading-tight focus:outline-none focus:ring-2 ${password !== passwordConfirmation && passwordConfirmation ? 'border-red-500 focus:ring-red-500' : 'focus:ring-accent'}`}
                 id="passwordConfirmation" type="password" placeholder="******************"
                 value={passwordConfirmation} onChange={(e) => setPasswordConfirmation(e.target.value)}
               />

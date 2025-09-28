@@ -43,18 +43,18 @@ const CalendarView = ({ resumes }: CalendarViewProps) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4 h-[70vh]">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 h-[70vh]">
       <div className="flex justify-end mb-4">
-        <div className="flex items-center space-x-2 bg-gray-100 p-1 rounded-lg">
-            <span className="text-sm font-medium mr-2">표시 기준:</span>
+        <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+            <span className="text-sm font-medium mr-2 dark:text-gray-300">표시 기준:</span>
             <button 
                 onClick={() => setEventType('deadline')}
-                className={`px-3 py-1 text-sm rounded-md ${eventType === 'deadline' ? 'bg-accent text-white shadow' : 'hover:bg-gray-200'}`}>
+                className={`px-3 py-1 text-sm rounded-md ${eventType === 'deadline' ? 'bg-accent text-white shadow' : 'hover:bg-gray-200 dark:hover:bg-gray-600 dark:text-gray-300'}`}>
                 마감일
             </button>
             <button 
                 onClick={() => setEventType('created_at')}
-                className={`px-3 py-1 text-sm rounded-md ${eventType === 'created_at' ? 'bg-accent text-white shadow' : 'hover:bg-gray-200'}`}>
+                className={`px-3 py-1 text-sm rounded-md ${eventType === 'created_at' ? 'bg-accent text-white shadow' : 'hover:bg-gray-200 dark:hover:bg-gray-600 dark:text-gray-300'}`}>
                 생성일
             </button>
         </div>
@@ -85,6 +85,52 @@ const CalendarView = ({ resumes }: CalendarViewProps) => {
         view={view}
         onView={(newView) => setView(newView)}
       />
+      <style jsx global>{`
+        .dark .rbc-toolbar {
+            color: #e5e7eb; /* gray-200 */
+        }
+        .dark .rbc-toolbar button {
+            color: #e5e7eb; /* gray-200 */
+        }
+        .dark .rbc-toolbar button:hover, .dark .rbc-toolbar button:focus {
+            background-color: #374151; /* gray-700 */
+            color: #e5e7eb;
+        }
+        .dark .rbc-toolbar .rbc-active {
+            background-color: #4f46e5; /* accent */
+            color: white;
+        }
+        .dark .rbc-off-range-bg {
+            background: #1f2937; /* gray-800 */
+        }
+        .dark .rbc-today {
+            background-color: #374151; /* gray-700 */
+        }
+        .dark .rbc-month-view, .dark .rbc-time-view, .dark .rbc-agenda-view, .dark .rbc-agenda-table {
+            background-color: #111827; /* gray-900 */
+            color: #e5e7eb; /* gray-200 */
+            border: 1px solid #374151; /* gray-700 */
+        }
+        .dark .rbc-header {
+            border-bottom: 1px solid #374151; /* gray-700 */
+        }
+        .dark .rbc-day-bg, .dark .rbc-month-row, .dark .rbc-agenda-table tbody tr, .dark .rbc-time-header-content, .dark .rbc-time-slot {
+            border-color: #374151; /* gray-700 */
+        }
+        .dark .rbc-event {
+            background-color: #4f46e5; /* accent */
+            color: white;
+        }
+        .dark .rbc-event.rbc-selected {
+            background-color: #4338ca; /* darker accent */
+        }
+        .dark .rbc-show-more {
+            color: #a5b4fc; /* lighter accent */
+        }
+        .dark .rbc-agenda-date-cell, .dark .rbc-agenda-time-cell {
+            color: #d1d5db; /* gray-300 */
+        }
+    `}</style>
     </div>
   );
 };

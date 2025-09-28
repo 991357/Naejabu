@@ -96,16 +96,16 @@ const TrashPage = () => {
 
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
             <AlertModal isOpen={alertModalOpen} onClose={() => setAlertModalOpen(false)} message={alertModalMessage} />
             <main className="container mx-auto p-8 font-sans">
-                <h1 className="text-3xl font-bold mb-8 text-text-primary">휴지통</h1>
+                <h1 className="text-3xl font-bold mb-8 text-gray-800 dark:text-gray-100">휴지통</h1>
 
-                {isLoading && <p className="text-center">로딩 중...</p>}
+                {isLoading && <p className="text-center dark:text-gray-300">로딩 중...</p>}
                 {error && <p className="text-center text-red-500">{error}</p>}
 
                 {!isLoading && !error && trashedResumes.length === 0 && (
-                    <div className="text-center p-10 border rounded-lg bg-white shadow-sm">
+                    <div className="text-center p-10 border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
                         <Image
                             src="/mascot.png"
                             alt="Mascot"
@@ -113,18 +113,18 @@ const TrashPage = () => {
                             height={150}
                             className="mx-auto mb-4"
                         />
-                        <p className="text-xl text-gray-600">휴지통이 비어있어요!</p>
-                        <p className="text-gray-500 mt-2">삭제된 자기소개서가 여기에 7일간 보관됩니다.</p>
+                        <p className="text-xl text-gray-600 dark:text-gray-300">휴지통이 비어있어요!</p>
+                        <p className="text-gray-500 dark:text-gray-400 mt-2">삭제된 자기소개서가 여기에 7일간 보관됩니다.</p>
                     </div>
                 )}
 
                 {!isLoading && !error && trashedResumes.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {trashedResumes.map((resume) => (
-                            <div key={resume.id} className="bg-white p-6 rounded-lg shadow-md border flex flex-col justify-between">
+                            <div key={resume.id} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border dark:border-gray-700 flex flex-col justify-between">
                                 <div>
-                                    <h2 className="text-xl font-semibold mb-2 text-text-primary">{resume.company_name}</h2>
-                                    <p className="text-sm text-gray-500 mb-4">삭제된 날짜: {new Date(resume.deleted_at).toLocaleDateString()}</p>
+                                    <h2 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-100">{resume.company_name}</h2>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">삭제된 날짜: {new Date(resume.deleted_at).toLocaleDateString()}</p>
                                     <p className="text-sm font-medium text-red-500">
                                         영구 삭제까지 {calculateDaysLeft(resume.deleted_at)}일 남음
                                     </p>

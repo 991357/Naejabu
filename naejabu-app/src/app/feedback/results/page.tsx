@@ -79,30 +79,30 @@ const FeedbackResultsPage = () => {
 
   return (
     <>
-      <div className="bg-gray-50 min-h-screen py-12">
+      <div className="bg-gray-50 dark:bg-gray-900 min-h-screen py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-5xl font-extrabold text-primary font-heading">첨삭 결과 확인</h1>
-              <p className="text-lg text-gray-600 mt-4">내가 요청한 자소서 첨삭 현황을 확인합니다.</p>
+              <h1 className="text-4xl md:text-5xl font-extrabold text-primary dark:text-blue-400 font-heading">첨삭 결과 확인</h1>
+              <p className="text-lg text-gray-600 dark:text-gray-300 mt-4">내가 요청한 자소서 첨삭 현황을 확인합니다.</p>
             </div>
 
             {loading ? (
-              <div className="text-center"><p>요청 목록을 불러오는 중...</p></div>
+              <div className="text-center dark:text-gray-300"><p>요청 목록을 불러오는 중...</p></div>
             ) : requests.length > 0 ? (
-              <div className="bg-white shadow-lg rounded-xl">
-                <ul className="divide-y divide-gray-200">
+              <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl">
+                <ul className="divide-y divide-gray-200 dark:divide-gray-700">
                   {requests.map((req) => (
                     <li key={req.request_id} className="p-6">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
                             <div className="mb-4 sm:mb-0">
-                                <h3 className="text-lg font-bold text-gray-800">{req.company_name}</h3>
-                                <p className="text-sm text-gray-500 mt-1">요청일: {new Date(req.created_at).toLocaleDateString()}</p>
-                                <p className="text-sm text-gray-500 mt-1">달린 피드백: {req.feedback_count}개</p>
+                                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">{req.company_name}</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">요청일: {new Date(req.created_at).toLocaleDateString()}</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">달린 피드백: {req.feedback_count}개</p>
                             </div>
                             <div className="flex items-center gap-4 w-full sm:w-auto">
                                 {getStatusComponent(req)}
-                                <Link href={`/feedback/results/${req.request_id}`} className="font-semibold text-primary hover:underline whitespace-nowrap">상세보기</Link>
+                                <Link href={`/feedback/results/${req.request_id}`} className="font-semibold text-primary dark:text-blue-400 hover:underline whitespace-nowrap">상세보기</Link>
                                 {(req.status === 'pending' || req.status === 'completed') && (
                                     <button onClick={() => handleCancelRequest(req.request_id)} className="text-sm text-red-500 hover:underline whitespace-nowrap">
                                         {req.status === 'completed' ? '등록 해제' : '요청 취소'}
@@ -115,8 +115,8 @@ const FeedbackResultsPage = () => {
                 </ul>
               </div>
             ) : (
-              <div className="text-center py-16 bg-white rounded-xl shadow-md">
-                <p className="text-gray-500 text-lg">아직 첨삭을 요청한 내역이 없습니다.</p>
+              <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-md">
+                <p className="text-gray-500 dark:text-gray-400 text-lg">아직 첨삭을 요청한 내역이 없습니다.</p>
               </div>
             )}
           </div>

@@ -8,6 +8,8 @@ import GlobalHeader from '../components/GlobalHeader';
 import { AuthProvider } from '../context/AuthContext';
 import { Noto_Sans_KR } from 'next/font/google';
 
+import { ThemeProvider } from '../context/ThemeContext';
+
 const notoSansKr = Noto_Sans_KR({
   subsets: ['latin'],
   weight: ['400', '700', '900'],
@@ -32,12 +34,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={`${notoSansKr.variable} font-sans bg-secondary text-text`}>
-        <AuthProvider>
-          <LoadingProvider>
-              <AppContent>{children}</AppContent>
-          </LoadingProvider>
-        </AuthProvider>
+      <body className={`${notoSansKr.variable} font-sans bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100`}>
+        <ThemeProvider>
+          <AuthProvider>
+            <LoadingProvider>
+                <AppContent>{children}</AppContent>
+            </LoadingProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

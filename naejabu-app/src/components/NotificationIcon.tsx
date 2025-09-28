@@ -108,29 +108,29 @@ const NotificationIcon = () => {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button onClick={() => setIsOpen(!isOpen)} className="relative">
+      <button onClick={() => setIsOpen(!isOpen)} className="relative text-gray-600 dark:text-gray-300">
         <FaBell className="text-xl" />
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+          <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-900"></span>
         )}
       </button>
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg z-20 text-gray-800">
-          <div className="p-4 flex justify-between items-center border-b">
+        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg z-20 text-gray-800 dark:text-gray-200">
+          <div className="p-4 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
             <h3 className="font-bold">알림</h3>
             <button onClick={handleReadAll} className="text-sm text-blue-500 hover:underline">모두 읽음</button>
           </div>
           <ul className="py-1 max-h-96 overflow-y-auto">
             {notifications.length > 0 ? (
               notifications.map(notif => (
-                <li key={notif.id} onClick={() => handleNotificationClick(notif)} className={`px-4 py-2 hover:bg-gray-100 cursor-pointer ${notif.is_read === 0 ? 'font-bold' : ''}`}>
+                <li key={notif.id} onClick={() => handleNotificationClick(notif)} className={`px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer ${notif.is_read === 0 ? 'font-bold' : ''}`}>
                   <p className="text-sm">{notif.title}</p>
-                  <p className="text-xs text-gray-500">{notif.message}</p>
-                  <p className="text-xs text-gray-400 mt-1">{new Date(notif.created_at).toLocaleString()}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{notif.message}</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{new Date(notif.created_at).toLocaleString()}</p>
                 </li>
               ))
             ) : (
-              <li className="px-4 py-3 text-center text-sm text-gray-500">새로운 알림이 없습니다.</li>
+              <li className="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">새로운 알림이 없습니다.</li>
             )}
           </ul>
         </div>

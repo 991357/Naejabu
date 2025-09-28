@@ -108,11 +108,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
             const feedbackResult = feedbackStmt.run(requestId, user.id, comment, now, now);
             const newFeedbackId = feedbackResult.lastInsertRowid;
 
-            // 2. Update request status
+            // 2. Update request status to 'in_progress'
             const requestStmt = db.prepare(
                 'UPDATE mentoring_requests SET status = ?, updated_at = ? WHERE id = ?'
             );
-            requestStmt.run('completed', now, requestId);
+            requestStmt.run('in_progress', now, requestId);
 
             // 3. Create notification for the mentee
             const menteeInfoStmt = db.prepare('SELECT mentee_id FROM mentoring_requests WHERE id = ?');

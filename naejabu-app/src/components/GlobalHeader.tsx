@@ -39,9 +39,9 @@ const GlobalHeader = () => {
   ];
 
   return (
-    <header className="w-full bg-white/80 backdrop-blur-sm shadow-md sticky top-0 z-50">
+    <header className="w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-md sticky top-0 z-50">
       <nav className="container mx-auto px-6 py-3 flex justify-between items-center">
-        <Link href="/" className="text-3xl font-extrabold text-primary font-heading">
+        <Link href="/" className="text-3xl font-extrabold text-primary dark:text-blue-400 font-heading">
           내자부
         </Link>
         
@@ -51,7 +51,7 @@ const GlobalHeader = () => {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-lg font-semibold transition-colors duration-300 ${pathname.startsWith(link.href) ? 'text-primary' : 'text-gray-600 hover:text-primary'}`}>
+                  className={`text-lg font-semibold transition-colors duration-300 ${pathname.startsWith(link.href) ? 'text-primary dark:text-blue-400' : 'text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-blue-400'}`}>
                   {link.label}
                 </Link>
               ))}
@@ -62,14 +62,14 @@ const GlobalHeader = () => {
           {user ? (
             <>
                 <NotificationIcon />
-                <Link href="/mypage" className="font-semibold text-gray-600 hover:text-primary transition-colors duration-300">마이페이지</Link>
+                <Link href="/mypage" className="font-semibold text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-blue-400 transition-colors duration-300">마이페이지</Link>
                 <button onClick={handleLogout} className="bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-opacity-90 transition-all duration-300">
                     로그아웃
                 </button>
             </>
           ) : (
             <>
-              <Link href="/login" className="font-semibold text-gray-600 hover:text-primary transition-colors duration-300">로그인</Link>
+              <Link href="/login" className="font-semibold text-gray-600 hover:text-primary dark:text-gray-300 dark:hover:text-blue-400 transition-colors duration-300">로그인</Link>
               <Link href="/register" className="bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-opacity-90 transition-all duration-300">
                 회원가입
               </Link>

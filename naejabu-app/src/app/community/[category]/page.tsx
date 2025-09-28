@@ -46,10 +46,10 @@ const CategoryPage = () => {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="flex justify-between items-center mb-10">
-        <div className="flex items-center gap-4 text-2xl font-bold text-primary font-heading">
-            <Link href="/community" className="text-gray-400 hover:text-gray-600 transition-colors">커뮤니티 홈</Link>
-            <span>&gt;</span>
-            <h1 className="text-4xl">{categoryNames[category] || '게시판'}</h1>
+        <div className="flex items-center gap-4 text-2xl font-bold text-primary dark:text-blue-400 font-heading">
+            <Link href="/community" className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">커뮤니티 홈</Link>
+            <span className="dark:text-gray-500">&gt;</span>
+            <h1 className="text-4xl dark:text-gray-100">{categoryNames[category] || '게시판'}</h1>
         </div>
         <Link href={`/community/write?category=${category}`} className="bg-accent hover:bg-opacity-90 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
           글쓰기
@@ -61,49 +61,49 @@ const CategoryPage = () => {
           type="text"
           placeholder="게시글 검색..."
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-relaxed focus:outline-none focus:ring-2 focus:ring-accent transition-shadow"
+          className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 leading-relaxed focus:outline-none focus:ring-2 focus:ring-accent dark:focus:ring-emerald-400 transition-shadow"
         />
       </div>
 
       {loading ? (
-        <p>Loading...</p>
+        <p className="dark:text-gray-300">Loading...</p>
       ) : (
-        <div className="bg-white shadow-md rounded-xl overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="bg-white dark:bg-gray-800 shadow-md rounded-xl overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20">번호</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">제목</th>
-                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">작성자</th>
-                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-40">작성일</th>
+                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-20">번호</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">제목</th>
+                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">작성자</th>
+                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-40">작성일</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {posts.length > 0 ? (
                 posts.map((post, index) => (
-                  <tr key={post.id} className={`transition-colors ${post.is_pinned ? 'bg-yellow-50 hover:bg-yellow-100' : 'hover:bg-gray-50'}`}>
+                  <tr key={post.id} className={`transition-colors ${post.is_pinned ? 'bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-900/20 dark:hover:bg-yellow-900/30' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-semibold">
                       {post.is_pinned ? (
-                        <span className="px-2 py-1 text-xs text-yellow-800 bg-yellow-200 rounded-full">고정</span>
+                        <span className="px-2 py-1 text-xs text-yellow-800 bg-yellow-200 dark:text-yellow-200 dark:bg-yellow-800 rounded-full">고정</span>
                       ) : (
-                        <span className="text-gray-500">{totalCount - index}</span>
+                        <span className="text-gray-500 dark:text-gray-400">{totalCount - index}</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                       <Link href={`/community/post/${post.id}`} className="hover:underline">
                         {post.title}
                       </Link>
                       {post.comment_count > 0 && (
-                        <span className="ml-2 text-xs text-gray-500">[{post.comment_count}]</span>
+                        <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">[{post.comment_count}]</span>
                       )}
                     </td>
-                    <td className={`px-6 py-4 whitespace-nowrap text-center text-sm ${post.author_is_admin ? 'font-bold text-red-500' : 'text-gray-500'}`}>{post.author_name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">{new Date(post.created_at).toLocaleDateString()}</td>
+                    <td className={`px-6 py-4 whitespace-nowrap text-center text-sm ${post.author_is_admin ? 'font-bold text-red-500' : 'text-gray-500 dark:text-gray-400'}`}>{post.author_name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500 dark:text-gray-400">{new Date(post.created_at).toLocaleDateString()}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={4} className="p-8 text-center text-gray-500">게시글이 없습니다.</td>
+                  <td colSpan={4} className="p-8 text-center text-gray-500 dark:text-gray-400">게시글이 없습니다.</td>
                 </tr>
               )}
             </tbody>

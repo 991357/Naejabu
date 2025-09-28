@@ -203,13 +203,13 @@ const PostDetailPage = () => {
         }}
         message={alertModalMessage}
       />
-      <div className="bg-white p-8 sm:p-12 rounded-xl shadow-lg">
+      <div className="bg-white dark:bg-gray-800 p-8 sm:p-12 rounded-xl shadow-lg">
         <div className="mb-8">
-          <span className="inline-block bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full mb-4">
+          <span className="inline-block bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 text-sm font-semibold px-3 py-1 rounded-full mb-4">
             {categoryNames[post.category] || post.category}
           </span>
-          <h1 className="text-4xl sm:text-5xl font-bold text-primary font-heading">{post.title}</h1>
-          <div className="flex items-center text-gray-500 mt-4">
+          <h1 className="text-4xl sm:text-5xl font-bold text-primary dark:text-blue-400 font-heading">{post.title}</h1>
+          <div className="flex items-center text-gray-500 dark:text-gray-400 mt-4">
             <span className={post.author_is_admin ? 'font-bold text-red-500' : ''}>{post.author_name}</span>
             <span className="mx-2">·</span>
             <span>{new Date(post.created_at).toLocaleDateString()}</span>
@@ -218,11 +218,11 @@ const PostDetailPage = () => {
         </div>
 
         <div
-          className="prose prose-lg max-w-none text-gray-800 leading-relaxed border-t pt-8 ql-editor"
+          className="prose prose-lg max-w-none text-gray-800 dark:text-gray-200 leading-relaxed border-t dark:border-gray-700 pt-8 ql-editor"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
 
-        <div className="flex justify-between items-center mt-12 border-t pt-6">
+        <div className="flex justify-between items-center mt-12 border-t dark:border-gray-700 pt-6">
             <button onClick={() => router.push(`/community/${post.category}`)} className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg transition-colors">
                 목록으로
             </button>
@@ -234,7 +234,7 @@ const PostDetailPage = () => {
                 )}
                 {canModifyPost && (
                     <>
-                        <button onClick={() => router.push(`/community/post/${id}/edit`)} className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition-colors">수정</button>
+                        <button onClick={() => router.push(`/community/post/${id}/edit`)} className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-gray-100 font-bold py-2 px-6 rounded-lg transition-colors">수정</button>
                         <button onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">삭제</button>
                     </>
                 )}
@@ -242,52 +242,52 @@ const PostDetailPage = () => {
         </div>
       </div>
 
-      <div className="bg-white p-8 sm:p-12 rounded-xl shadow-lg mt-8">
-        <h2 className="text-3xl font-bold text-primary mb-6">{post.category === 'inquiry' ? '답변' : '댓글'}</h2>
+      <div className="bg-white dark:bg-gray-800 p-8 sm:p-12 rounded-xl shadow-lg mt-8">
+        <h2 className="text-3xl font-bold text-primary dark:text-blue-400 mb-6">{post.category === 'inquiry' ? '답변' : '댓글'}</h2>
         
         <div className="space-y-6">
           {comments.map(comment => (
-            <div key={comment.id} className={`p-4 rounded-lg ${comment.author_is_admin ? 'bg-blue-50' : 'bg-gray-50'}`}>
+            <div key={comment.id} className={`p-4 rounded-lg ${comment.author_is_admin ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-gray-50 dark:bg-gray-700/50'}`}>
               {editingCommentId === comment.id ? (
                 <div>
                   <textarea
                     value={editingContent}
                     onChange={(e) => setEditingContent(e.target.value)}
-                    className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-relaxed focus:outline-none focus:ring-2 focus:ring-accent transition-shadow mb-4"
+                    className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 leading-relaxed focus:outline-none focus:ring-2 focus:ring-accent transition-shadow mb-4"
                     rows={3}
                   />
                   <div className="flex justify-end gap-2">
-                    <button onClick={handleCancelEdit} className="text-sm text-gray-600 py-1 px-3 rounded-md hover:bg-gray-200">취소</button>
+                    <button onClick={handleCancelEdit} className="text-sm text-gray-600 dark:text-gray-300 py-1 px-3 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">취소</button>
                     <button onClick={() => handleUpdateComment(comment.id)} className="text-sm text-white bg-accent py-1 px-3 rounded-md hover:bg-opacity-90">저장</button>
                   </div>
                 </div>
               ) : (
                 <div>
                   <div className="flex items-center mb-2">
-                    <p className={`font-semibold ${comment.author_is_admin ? 'text-red-500' : 'text-gray-800'}`}>{comment.author_name}</p>
-                    <span className="text-gray-400 text-sm ml-auto">{new Date(comment.created_at).toLocaleString()}</span>
+                    <p className={`font-semibold ${comment.author_is_admin ? 'text-red-500' : 'text-gray-800 dark:text-gray-100'}`}>{comment.author_name}</p>
+                    <span className="text-gray-400 dark:text-gray-500 text-sm ml-auto">{new Date(comment.created_at).toLocaleString()}</span>
                   </div>
-                  <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
+                  <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{comment.content}</p>
                   {user && (user.id === comment.user_id || user.is_admin === 1) && (
                     <div className="flex justify-end gap-2 mt-2">
-                      <button onClick={() => handleStartEdit(comment)} className="text-xs text-gray-500 hover:underline">수정</button>
-                      <button onClick={() => handleDeleteComment(comment.id)} className="text-xs text-gray-500 hover:underline">삭제</button>
+                      <button onClick={() => handleStartEdit(comment)} className="text-xs text-gray-500 dark:text-gray-400 hover:underline">수정</button>
+                      <button onClick={() => handleDeleteComment(comment.id)} className="text-xs text-gray-500 dark:text-gray-400 hover:underline">삭제</button>
                     </div>
                   )}
                 </div>
               )}
             </div>
           ))}
-          {comments.length === 0 && <p className="text-gray-500">아직 댓글이 없습니다.</p>}
+          {comments.length === 0 && <p className="text-gray-500 dark:text-gray-400">아직 댓글이 없습니다.</p>}
         </div>
 
         {showCommentForm && (
-          <form onSubmit={handleCommentSubmit} className="mt-8 pt-6 border-t">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">{post.category === 'inquiry' ? '답변 작성' : '댓글 작성'}</h3>
+          <form onSubmit={handleCommentSubmit} className="mt-8 pt-6 border-t dark:border-gray-700">
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">{post.category === 'inquiry' ? '답변 작성' : '댓글 작성'}</h3>
             <textarea
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-relaxed focus:outline-none focus:ring-2 focus:ring-accent transition-shadow"
+              className="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 leading-relaxed focus:outline-none focus:ring-2 focus:ring-accent transition-shadow"
               rows={4}
               placeholder={post.category === 'inquiry' ? '답변을 입력하세요.' : '댓글을 입력하세요.'}
               required

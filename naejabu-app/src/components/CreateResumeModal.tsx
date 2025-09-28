@@ -148,9 +148,16 @@ const CreateResumeModal: React.FC<CreateResumeModalProps> = ({ onClose, onCreate
             </button>
         </div>
 
-        <div className="mt-10">
+        <div className="mt-10 grid grid-cols-2 gap-4">
           <button
-            className="bg-accent hover:bg-opacity-90 text-white font-bold py-4 px-8 rounded-lg focus:outline-none focus:shadow-outline w-full transition-all duration-300 transform hover:scale-105"
+            type="button"
+            onClick={onClose}
+            className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 px-4 rounded-lg focus:outline-none focus:shadow-outline transition-colors"
+          >
+            취소
+          </button>
+          <button
+            className="w-full bg-accent hover:bg-opacity-90 text-white font-bold py-4 px-4 rounded-lg focus:outline-none focus:shadow-outline transition-all duration-300 transform hover:scale-105"
             type="submit"
           >
             만들기

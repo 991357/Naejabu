@@ -63,16 +63,16 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center relative bg-gray-100">
-      <div className="bg-white shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4 w-full max-w-md">
-        <h1 className="font-heading text-3xl font-bold text-center mb-8 text-primary">로그인</h1>
+    <div className="min-h-screen flex flex-col justify-center items-center relative bg-gray-100 dark:bg-gray-900">
+      <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4 w-full max-w-md">
+        <h1 className="font-heading text-3xl font-bold text-center mb-8 text-primary dark:text-blue-400">로그인</h1>
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+          <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="email">
             이메일
           </label>
           <input
-            className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-accent"
+            className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 leading-tight focus:outline-none focus:ring-2 focus:ring-accent"
             id="email"
             type="email"
             placeholder="email@example.com"
@@ -82,12 +82,12 @@ const LoginPage = () => {
           />
         </div>
         <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+          <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="password">
             비밀번호
           </label>
           <div className="relative">
             <input
-              className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-accent pr-10"
+              className="shadow-sm appearance-none border rounded w-full py-3 px-4 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 leading-tight focus:outline-none focus:ring-2 focus:ring-accent pr-10"
               id="password"
               type={showPassword ? 'text' : 'password'}
               placeholder="******************"
@@ -103,7 +103,7 @@ const LoginPage = () => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700 disabled:cursor-not-allowed"
+              className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 disabled:cursor-not-allowed"
               disabled={isLoggingIn}
             >
               {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
@@ -125,11 +125,11 @@ const LoginPage = () => {
             회원가입
           </Link>
           <span className="text-gray-400">|</span>
-          <Link href="/find-id" className="inline-block align-baseline font-bold text-sm text-gray-600 hover:text-accent ml-4 mr-4">
+          <Link href="/find-id" className="inline-block align-baseline font-bold text-sm text-gray-600 dark:text-gray-300 hover:text-accent ml-4 mr-4">
             아이디 찾기
           </Link>
           <span className="text-gray-400">|</span>
-          <Link href="/find-password" className="inline-block align-baseline font-bold text-sm text-gray-600 hover:text-accent ml-4">
+          <Link href="/find-password" className="inline-block align-baseline font-bold text-sm text-gray-600 dark:text-gray-300 hover:text-accent ml-4">
             비밀번호 찾기
           </Link>
         </div>

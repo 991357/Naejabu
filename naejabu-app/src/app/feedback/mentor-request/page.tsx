@@ -113,16 +113,16 @@ const MentorRequestPage = () => {
 
   return (
     <>
-      <div className="bg-gray-50 min-h-screen py-12">
+      <div className="bg-gray-50 dark:bg-gray-900 min-h-screen py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-5xl font-extrabold text-primary font-heading">멘토에게 첨삭받기</h1>
-              <p className="text-lg text-gray-600 mt-4">첨삭받고 싶은 자소서를 하나 선택하여 요청해주세요.</p>
+              <h1 className="text-4xl md:text-5xl font-extrabold text-primary dark:text-blue-400 font-heading">멘토에게 첨삭받기</h1>
+              <p className="text-lg text-gray-600 dark:text-gray-300 mt-4">첨삭받고 싶은 자소서를 하나 선택하여 요청해주세요.</p>
             </div>
 
             {loading ? (
-              <div className="text-center"><p>이력서를 불러오는 중...</p></div>
+              <div className="text-center dark:text-gray-300"><p>이력서를 불러오는 중...</p></div>
             ) : resumes.length > 0 ? (
               <div className="space-y-4">
                 {resumes.map((resume) => {
@@ -131,18 +131,18 @@ const MentorRequestPage = () => {
                         <div
                             key={resume.id}
                             onClick={() => isSelectable && handleSelectResume(resume)}
-                            className={`p-6 bg-white rounded-xl shadow-md transition-all duration-200 ${
-                                !isSelectable ? 'bg-gray-100 cursor-not-allowed opacity-70' :
+                            className={`p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md transition-all duration-200 ${
+                                !isSelectable ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed opacity-70' :
                                 selectedResumeId === resume.id ? 'ring-4 ring-accent ring-opacity-75' : 'cursor-pointer hover:shadow-lg hover:scale-105'
                             }`}>
                             <div className="flex justify-between items-center">
                                 <div>
-                                    <h2 className="text-xl font-bold text-gray-800">{resume.company_name}</h2>
-                                    <p className="text-sm text-gray-500 mt-1">마감일: {new Date(resume.deadline).toLocaleDateString()}</p>
+                                    <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">{resume.company_name}</h2>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">마감일: {new Date(resume.deadline).toLocaleDateString()}</p>
                                 </div>
                                 <div className='text-right'>
                                     {getStatusBadge(resume)}
-                                    <p className="text-xs text-gray-400 mt-1">최종수정: {new Date(resume.updated_at).toLocaleDateString()}</p>
+                                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">최종수정: {new Date(resume.updated_at).toLocaleDateString()}</p>
                                 </div>
                             </div>
                         </div>
@@ -150,9 +150,9 @@ const MentorRequestPage = () => {
                 })}
               </div>
             ) : (
-              <div className="text-center py-16 bg-white rounded-xl shadow-md">
-                <p className="text-gray-500">작성된 이력서가 없습니다.</p>
-                <p className="text-gray-500 mt-2">먼저 이력서를 작성해주세요.</p>
+              <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-md">
+                <p className="text-gray-500 dark:text-gray-400">작성된 이력서가 없습니다.</p>
+                <p className="text-gray-500 dark:text-gray-400 mt-2">먼저 이력서를 작성해주세요.</p>
               </div>
             )}
 

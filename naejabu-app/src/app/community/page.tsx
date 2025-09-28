@@ -43,11 +43,11 @@ const CommunityHomePage = () => {
   }, []);
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-extrabold text-primary font-heading">커뮤니티</h1>
-          <p className="text-lg text-gray-600 mt-4">다양한 정보를 나누고 소통하는 공간입니다.</p>
+          <h1 className="text-5xl md:text-6xl font-extrabold text-primary dark:text-blue-400 font-heading">커뮤니티</h1>
+          <p className="text-lg text-gray-600 dark:text-gray-300 mt-4">다양한 정보를 나누고 소통하는 공간입니다.</p>
         </div>
 
         {user && (
@@ -64,33 +64,33 @@ const CommunityHomePage = () => {
         )}
 
         {loading ? (
-          <div className="text-center"><p>Loading...</p></div>
+          <div className="text-center dark:text-gray-300"><p>Loading...</p></div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {categories.map(category => (
-              <section key={category.id} className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col">
+              <section key={category.id} className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col">
                 <div className="flex justify-between items-center mb-4">
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-full ${category.color}`}>{category.icon}</div>
-                    <h2 className="text-2xl font-bold text-gray-800">{category.name}</h2>
+                    <div className={`p-2 rounded-full ${category.color} dark:bg-opacity-20`}>{category.icon}</div>
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">{category.name}</h2>
                   </div>
-                  <Link href={`/community/${category.id}`} className="text-sm font-semibold text-accent hover:underline">
+                  <Link href={`/community/${category.id}`} className="text-sm font-semibold text-accent hover:underline dark:text-emerald-400">
                     더보기 &rarr;
                   </Link>
                 </div>
                 <div className="flex-grow space-y-2">
                   {(postsByCategory[category.id] && postsByCategory[category.id].length > 0) ? (
                     postsByCategory[category.id].map((post: any) => (
-                      <Link key={post.id} href={`/community/post/${post.id}`} className="block p-3 rounded-lg hover:bg-gray-100 transition-colors">
-                        <p className="truncate font-semibold text-gray-700">{post.title}</p>
-                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                      <Link key={post.id} href={`/community/post/${post.id}`} className="block p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                        <p className="truncate font-semibold text-gray-700 dark:text-gray-200">{post.title}</p>
+                        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
                           <span>{post.author_name}</span>
                           <span>{new Date(post.created_at).toLocaleDateString()}</span>
                         </div>
                       </Link>
                     ))
                   ) : (
-                    <div className="flex-grow flex items-center justify-center text-center py-8 text-gray-500">
+                    <div className="flex-grow flex items-center justify-center text-center py-8 text-gray-500 dark:text-gray-400">
                       <p>아직 게시글이 없습니다.</p>
                     </div>
                   )}

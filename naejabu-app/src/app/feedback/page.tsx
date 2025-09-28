@@ -28,21 +28,21 @@ const FeedbackHomePage = () => {
   const options = user?.role === 'mentor' ? mentorOptions : menteeOptions;
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-6xl font-extrabold text-primary font-heading">첨삭받기</h1>
-          <p className="text-lg text-gray-600 mt-4">AI와 현직자 멘토에게 자소서 피드백을 받아보세요.</p>
+          <h1 className="text-5xl md:text-6xl font-extrabold text-primary dark:text-blue-400 font-heading">첨삭받기</h1>
+          <p className="text-lg text-gray-600 dark:text-gray-300 mt-4">AI와 현직자 멘토에게 자소서 피드백을 받아보세요.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {options.map((option) => (
-            <Link href={option.href} key={option.title} className="block p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-              <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/10 text-primary mx-auto mb-6">
+            <Link href={option.href} key={option.title} className="block p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/10 text-primary dark:bg-blue-900/50 dark:text-blue-300 mx-auto mb-6">
                 {option.icon}
               </div>
-              <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">{option.title}</h2>
-              <p className="text-center text-gray-500">{option.description}</p>
+              <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-gray-100 mb-2">{option.title}</h2>
+              <p className="text-center text-gray-500 dark:text-gray-400">{option.description}</p>
             </Link>
           ))}
         </div>

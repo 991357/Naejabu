@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
       FROM mentoring_requests mr
       JOIN resumes r ON mr.resume_id = r.id
       JOIN users u ON mr.mentee_id = u.id
-      WHERE mr.status = 'pending'
+      WHERE mr.status IN ('pending', 'in_progress')
       ORDER BY mr.created_at ASC
     `);
     const requests = stmt.all();

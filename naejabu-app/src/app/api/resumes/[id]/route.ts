@@ -105,6 +105,46 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
         }
 
+        // Check for changes before updating
+        const currentResumeStmt = db.prepare('SELECT * FROM resumes WHERE id = ? AND user_id = ?');
+        const currentResume = currentResumeStmt.get(resumeId, userId);
+
+        if (!currentResume) {
+            return NextResponse.json({ message: 'Resume not found or access denied' }, { status: 404 });
+        }
+
+        const currentQuestionsStmt = db.prepare('SELECT question_text, answer_text, char_limit FROM resume_questions WHERE resume_id = ?');
+        const currentQuestions = currentQuestionsStmt.all(resumeId);
+
+        let isChanged = false;
+        if (currentResume.company_name !== company_name || currentResume.deadline !== deadline) {
+            isChanged = true;
+        }
+
+        if (!isChanged) {
+            if (questions.length !== currentQuestions.length) {
+                isChanged = true;
+            } else {
+                for (let i = 0; i < questions.length; i++) {
+                    const qClient = questions[i];
+                    const qDb = currentQuestions[i];
+                    if (
+                        qClient.question_text !== qDb.question_text ||
+                        (qClient.answer_text || '') !== qDb.answer_text ||
+                        (qClient.char_limit || 1000) !== qDb.char_limit
+                    ) {
+                        isChanged = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!isChanged) {
+            const resQuestions = db.prepare('SELECT * FROM resume_questions WHERE resume_id = ?').all(resumeId);
+            return NextResponse.json({ ...currentResume, questions: resQuestions });
+        }
+
         const now = new Date().toISOString();
         updateResumeWithQuestions({ resumeId, userId, company_name, deadline, questions, now });
 
