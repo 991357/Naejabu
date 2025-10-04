@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 
 interface CreateResumeModalProps {
   onClose: () => void;
@@ -10,7 +10,7 @@ const CreateResumeModal: React.FC<CreateResumeModalProps> = ({ onClose, onCreate
     const today = new Date();
     const offset = today.getTimezoneOffset();
     const todayWithOffset = new Date(today.getTime() - (offset*60*1000));
-    todayWithOffset.setHours(18, 0, 0, 0); // Set time to 18:00
+    todayWithOffset.setHours(23, 59, 0, 0); // Set time to 23:59
     return todayWithOffset.toISOString().slice(0, 16);
   };
 
@@ -21,7 +21,6 @@ const CreateResumeModal: React.FC<CreateResumeModalProps> = ({ onClose, onCreate
     { id: Date.now() + 1, value: '', charLimit: 700 },
   ]);
   const [error, setError] = useState('');
-  const deadlineInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddQuestion = () => {
     setQuestions([...questions, { id: Date.now(), value: '', charLimit: 1000 }]);
@@ -40,9 +39,16 @@ const CreateResumeModal: React.FC<CreateResumeModalProps> = ({ onClose, onCreate
   };
 
   const handleDeadlineChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDeadline(e.target.value);
-    if (deadlineInputRef.current) {
-      deadlineInputRef.current.blur();
+    const selectedDate = new Date(e.target.value);
+    // Check if the date is valid
+    if (!isNaN(selectedDate.getTime())) {
+      const offset = selectedDate.getTimezoneOffset();
+      const selectedDateWithOffset = new Date(selectedDate.getTime() - (offset * 60 * 1000));
+      selectedDateWithOffset.setHours(23, 59, 0, 0);
+      setDeadline(selectedDateWithOffset.toISOString().slice(0, 16));
+    } else {
+      // Handle invalid date input, maybe set to default or show an error
+      setDeadline(getDefaultDeadline());
     }
   };
 
@@ -93,7 +99,6 @@ const CreateResumeModal: React.FC<CreateResumeModalProps> = ({ onClose, onCreate
             마감일자
           </label>
           <input
-            ref={deadlineInputRef}
             className="shadow-lg appearance-none border rounded-lg w-full py-4 px-5 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-accent transition-shadow"
             id="deadline"
             type="datetime-local"
