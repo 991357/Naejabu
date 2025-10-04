@@ -3,12 +3,22 @@
 import { useState, useEffect } from 'react';
 import withAuth from '@/components/withAuth';
 import AlertModal from '@/components/AlertModal';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface Resume {
   id: number;
   company_name: string;
   deadline: string;
   updated_at: string;
+}
+
+interface Feedback {
+  overall: string;
+  suggestions: {
+    original: string;
+    suggestion: string;
+    comment: string;
+  }[];
 }
 
 const getAuthHeaders = () => {
@@ -19,10 +29,39 @@ const getAuthHeaders = () => {
     };
 };
 
+const FeedbackDisplay = ({ feedback }: { feedback: Feedback }) => (
+  <div className="mt-8 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg animate-fade-in">
+    <h3 className="text-2xl font-bold text-primary dark:text-blue-400 mb-4">AI 첨삭 결과</h3>
+    <div className="mb-6">
+      <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">총평</h4>
+      <p className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{feedback.overall}</p>
+    </div>
+    <div>
+      <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">개선 제안</h4>
+      <div className="space-y-4">
+        {feedback.suggestions.map((item, index) => (
+          <div key={index} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">원본 내용</p>
+            <p className="text-gray-700 dark:text-gray-300 line-through">{item.original}</p>
+            <hr className="my-3 border-gray-200 dark:border-gray-600" />
+            <p className="text-sm text-green-600 dark:text-green-400 mb-2">추천 수정안</p>
+            <p className="text-gray-800 dark:text-gray-100 font-semibold">{item.suggestion}</p>
+            <div className="mt-3 p-3 bg-blue-50 dark:bg-gray-700 rounded">
+              <p className="text-sm text-blue-800 dark:text-blue-300"><span className="font-bold">코멘트:</span> {item.comment}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
 const AIFeedbackPage = () => {
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [aiFeedback, setAiFeedback] = useState<Feedback | null>(null);
   const [alertModalOpen, setAlertModalOpen] = useState(false);
   const [alertModalMessage, setAlertModalMessage] = useState('');
 
@@ -50,17 +89,56 @@ const AIFeedbackPage = () => {
 
   const handleSelectResume = (id: number) => {
     setSelectedResumeId(id);
+    setAiFeedback(null); // 이력서 선택 변경 시 이전 피드백 숨기기
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedResumeId) {
         setAlertModalMessage('첨삭받을 이력서를 선택해주세요.');
         setAlertModalOpen(true);
         return;
     }
-    // AI 기능은 준비 중
-    setAlertModalMessage('기능 준비 중입니다. 빠른 시일 내에 찾아뵙겠습니다!');
-    setAlertModalOpen(true);
+
+    setIsAiLoading(true);
+    setAiFeedback(null);
+
+    try {
+      // 1. 선택된 이력서의 전체 내용 가져오기
+      const resumeRes = await fetch(`/api/resumes/${selectedResumeId}`, { headers: getAuthHeaders() });
+      if (!resumeRes.ok) throw new Error('선택된 이력서의 내용을 가져오는 데 실패했습니다.');
+      const resumeData = await resumeRes.json();
+
+      // 이력서 질문과 답변을 하나의 문자열로 합칩니다.
+      const resumeContent = resumeData.questions && resumeData.questions
+        .map((q: { question_text: string; answer_text: string }) => `질문: ${q.question_text}\n답변: ${q.answer_text || ''}`)
+        .join('\n\n');
+
+      if (!resumeContent || resumeContent.trim() === '') {
+        throw new Error('이력서 내용이 비어있습니다. 질문에 대한 답변을 먼저 작성해주세요.');
+      }
+
+      // 2. AI 첨삭 API 호출
+      const aiRes = await fetch('/api/feedback/ai', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ resumeContent }),
+      });
+
+      if (!aiRes.ok) {
+        const errorData = await aiRes.json();
+        throw new Error(errorData.error || 'AI 첨삭에 실패했습니다.');
+      }
+
+      const { feedback } = await aiRes.json();
+      setAiFeedback(feedback);
+
+    } catch (error: any) {
+      console.error(error);
+      setAlertModalMessage(error.message || '오류가 발생했습니다.');
+      setAlertModalOpen(true);
+    } finally {
+      setIsAiLoading(false);
+    }
   };
 
   return (
@@ -106,12 +184,16 @@ const AIFeedbackPage = () => {
             <div className="mt-12 text-center">
               <button
                 onClick={handleSubmit}
-                disabled={!selectedResumeId || loading}
+                disabled={!selectedResumeId || loading || isAiLoading}
                 className="bg-accent text-white font-bold py-4 px-10 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:scale-100 shadow-lg"
               >
-                AI 첨삭받기
+                {isAiLoading ? 'AI가 분석 중...' : 'AI 첨삭받기'}
               </button>
             </div>
+
+            {isAiLoading && <LoadingSpinner />}
+            {aiFeedback && <FeedbackDisplay feedback={aiFeedback} />}
+
           </div>
         </div>
       </div>

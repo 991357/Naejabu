@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@types/nodemailer": "^7.0.1",
     "@types/react-big-calendar": "^1.16.2",
     "autoprefixer": "^10.4.21",
