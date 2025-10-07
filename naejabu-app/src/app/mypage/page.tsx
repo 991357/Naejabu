@@ -79,7 +79,7 @@ function MyPage() {
         showLoading();
         try {
             const response = await fetch('/api/auth/me', {
-                method: 'PUT',
+                method: 'PATCH',
                 headers: getAuthHeaders(),
                 body: JSON.stringify({
                     english_name: englishName,

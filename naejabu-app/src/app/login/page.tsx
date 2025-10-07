@@ -12,7 +12,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const { setUser, setToken } = useAuth();
+  const { login } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -36,22 +36,8 @@ const LoginPage = () => {
 
       if (response.ok) {
         const { token } = data;
-        localStorage.setItem('token', token);
         localStorage.setItem('savedEmail', email);
-        setToken(token);
-
-        // Fetch user data
-        const meResponse = await fetch('/api/auth/me', {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
-
-        if (meResponse.ok) {
-          const userData = await meResponse.json();
-          setUser(userData);
-          router.push('/resumes');
-        } else {
-          throw new Error('Failed to fetch user data after login.');
-        }
+        login(token); // Use the login function from context
       } else {
         setError(data.message || 'An error occurred');
       }

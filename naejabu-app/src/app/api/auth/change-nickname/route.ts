@@ -34,7 +34,15 @@ export async function PUT(req: NextRequest) {
     const stmt = db.prepare('UPDATE users SET nickname = ? WHERE id = ?');
     stmt.run(nickname, user.id);
 
-    return NextResponse.json({ message: 'Nickname updated successfully' });
+    const updatedUserStmt = db.prepare('SELECT * FROM users WHERE id = ?');
+    const updatedUser = updatedUserStmt.get(user.id) as any;
+
+    const token = jwt.sign(
+      { id: updatedUser.id, name: updatedUser.name, role: updatedUser.role },
+      process.env.JWT_SECRET || 'your-default-secret'
+    );
+
+    return NextResponse.json({ message: 'Nickname updated successfully', token });
   } catch (error: any) {
     console.error('Nickname Change Error:', error);
     return NextResponse.json(
