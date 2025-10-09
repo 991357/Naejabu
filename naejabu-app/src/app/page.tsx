@@ -95,16 +95,17 @@ const LoggedOutHome = () => (
 const LoggedInHome = ({ user }) => {
   const [resumes, setResumes] = useState([]);
   const [posts, setPosts] = useState([]);
+  const { getAuthHeaders } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) return;
+      const headers = getAuthHeaders();
+      if (!headers.Authorization) return;
 
       // Fetch resumes
       try {
         const resResumes = await fetch('/api/resumes', {
-          headers: { 'Authorization': `Bearer ${token}` },
+          headers: headers,
         });
         if (resResumes.ok) {
           const data = await resResumes.json();
@@ -129,7 +130,7 @@ const LoggedInHome = ({ user }) => {
     };
 
     fetchData();
-  }, []);
+  }, [getAuthHeaders]);
 
   return (
     <div className="bg-secondary dark:bg-gray-900 min-h-screen">

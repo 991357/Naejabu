@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import withAuth from '@/components/withAuth';
 import AlertModal from '@/components/AlertModal';
 import Link from 'next/link';
+import useAuth from '@/hooks/useAuth';
 
 // Define interfaces for the data structure
 interface Question {
@@ -29,15 +30,11 @@ interface ResultDetails {
     feedback: Feedback[];
 }
 
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    return { 'Authorization': `Bearer ${token}` };
-};
-
 const MenteeResultDetailPage = () => {
     const router = useRouter();
     const params = useParams();
     const { id } = params;
+    const { getAuthHeaders } = useAuth();
 
     const [details, setDetails] = useState<ResultDetails | null>(null);
     const [loading, setLoading] = useState(true);
@@ -62,7 +59,7 @@ const MenteeResultDetailPage = () => {
             }
         };
         fetchDetails();
-    }, [id]);
+    }, [id, getAuthHeaders]);
 
     const getStatusComponent = (status: ResultDetails['status']) => {
         const styles = {

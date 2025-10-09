@@ -12,6 +12,7 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [rememberEmail, setRememberEmail] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
 
@@ -19,6 +20,7 @@ const LoginPage = () => {
     const savedEmail = localStorage.getItem('savedEmail');
     if (savedEmail) {
       setEmail(savedEmail);
+      setRememberEmail(true);
     }
   }, []);
 
@@ -36,7 +38,11 @@ const LoginPage = () => {
 
       if (response.ok) {
         const { token } = data;
-        localStorage.setItem('savedEmail', email);
+        if (rememberEmail) {
+          localStorage.setItem('savedEmail', email);
+        } else {
+          localStorage.removeItem('savedEmail');
+        }
         login(token); // Use the login function from context
       } else {
         setError(data.message || 'An error occurred');
@@ -67,7 +73,7 @@ const LoginPage = () => {
             disabled={isLoggingIn}
           />
         </div>
-        <div className="mb-6">
+        <div className="mb-4">
           <label className="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" htmlFor="password">
             비밀번호
           </label>
@@ -95,6 +101,18 @@ const LoginPage = () => {
               {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
             </button>
           </div>
+        </div>
+        <div className="mb-4 flex items-center">
+          <input
+            id="remember-me"
+            type="checkbox"
+            className="h-4 w-4 text-accent focus:ring-accent border-gray-300 rounded"
+            checked={rememberEmail}
+            onChange={(e) => setRememberEmail(e.target.checked)}
+          />
+          <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+            내 아이디 기억하기
+          </label>
         </div>
         <div className="flex items-center justify-between mb-4">
           <button

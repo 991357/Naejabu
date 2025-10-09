@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import withAuth from '@/components/withAuth';
 import Link from 'next/link';
 import AlertModal from '@/components/AlertModal';
+import useAuth from '@/hooks/useAuth';
 
 interface PendingRequest {
   request_id: number;
@@ -12,18 +13,11 @@ interface PendingRequest {
   created_at: string;
 }
 
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-    };
-};
-
 const MentorGiveFeedbackPage = () => {
   const [requests, setRequests] = useState<PendingRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { getAuthHeaders } = useAuth();
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -47,7 +41,7 @@ const MentorGiveFeedbackPage = () => {
       }
     };
     fetchRequests();
-  }, []);
+  }, [getAuthHeaders]);
 
   return (
     <>

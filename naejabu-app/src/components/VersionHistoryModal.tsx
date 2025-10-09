@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Modal from './Modal';
 import LoadingSpinner from './LoadingSpinner';
+import useAuth from '@/hooks/useAuth';
 
 interface Version {
   id: number;
@@ -38,14 +39,14 @@ const VersionHistoryModal = ({ resumeId, onClose, onRestore, isOpen }: VersionHi
 
   const [versionToDelete, setVersionToDelete] = useState<Version | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const { getAuthHeaders } = useAuth();
 
   const fetchVersions = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`/api/resumes/${resumeId}/versions`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: getAuthHeaders(),
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -83,9 +84,8 @@ const VersionHistoryModal = ({ resumeId, onClose, onRestore, isOpen }: VersionHi
 
       setIsPreviewLoading(true);
       try {
-        const token = localStorage.getItem('token');
         const response = await fetch(`/api/resumes/${resumeId}/versions/${selectedVersionId}`, {
-          headers: { 'Authorization': `Bearer ${token}` },
+          headers: getAuthHeaders(),
         });
         if (!response.ok) {
           const errorData = await response.json();
@@ -115,10 +115,9 @@ const VersionHistoryModal = ({ resumeId, onClose, onRestore, isOpen }: VersionHi
     setIsDeleting(true);
     setError(null);
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`/api/resumes/${resumeId}/versions/${versionToDelete.id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: getAuthHeaders(),
       });
 
       if (!response.ok) {

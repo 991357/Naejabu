@@ -8,7 +8,7 @@ import 'react-quill/dist/quill.snow.css';
 import AlertModal from '@/components/AlertModal';
 
 const PostDetailPage = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, getAuthHeaders, loading: authLoading } = useAuth();
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
@@ -47,12 +47,13 @@ const PostDetailPage = () => {
     const fetchPostAndComments = async () => {
       setLoading(true);
       try {
-        const postResponse = await fetch(`/api/posts/${id}`);
+        const headers = getAuthHeaders();
+        const postResponse = await fetch(`/api/posts/${id}`, { headers });
         if (!postResponse.ok) throw new Error('게시글을 찾을 수 없습니다.');
         const postData = await postResponse.json();
         setPost(postData);
 
-        const commentsResponse = await fetch(`/api/posts/${id}/comments`);
+        const commentsResponse = await fetch(`/api/posts/${id}/comments`, { headers });
         if (commentsResponse.ok) {
           const commentsData = await commentsResponse.json();
           setComments(commentsData);
@@ -65,14 +66,14 @@ const PostDetailPage = () => {
     };
 
     fetchPostAndComments();
-  }, [id]);
+  }, [id, getAuthHeaders]);
 
   const handleDelete = async () => {
     if (!confirm('정말로 이 게시글을 삭제하시겠습니까?')) return;
     try {
       const response = await fetch(`/api/posts/${id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        headers: getAuthHeaders(),
       });
       if (!response.ok) {
         const data = await response.json();
@@ -88,7 +89,7 @@ const PostDetailPage = () => {
     try {
       const response = await fetch(`/api/posts/${id}/pin`, {
         method: 'PUT',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        headers: getAuthHeaders(),
       });
       if (!response.ok) {
         const data = await response.json();
@@ -108,10 +109,7 @@ const PostDetailPage = () => {
     try {
       const response = await fetch(`/api/posts/${id}/comments`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ content: newComment }),
       });
       if (!response.ok) {
@@ -131,7 +129,7 @@ const PostDetailPage = () => {
     try {
       const response = await fetch(`/api/posts/${id}/comments/${commentId}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        headers: getAuthHeaders(),
       });
       if (!response.ok) {
         const data = await response.json();
@@ -158,10 +156,7 @@ const PostDetailPage = () => {
     try {
       const response = await fetch(`/api/posts/${id}/comments/${commentId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ content: editingContent }),
       });
       if (!response.ok) {

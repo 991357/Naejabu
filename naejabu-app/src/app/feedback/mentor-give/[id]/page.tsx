@@ -6,6 +6,7 @@ import withAuth from '@/components/withAuth';
 import AlertModal from '@/components/AlertModal';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import useAuth from '@/hooks/useAuth';
 
 // Define interfaces for the data structure
 interface Question {
@@ -31,11 +32,6 @@ interface RequestDetails {
     feedback: Feedback[];
 }
 
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-};
-
 const modules = {
     toolbar: [
       [{ 'header': [1, 2, 3, false] }],
@@ -51,6 +47,7 @@ const MentorFeedbackDetailPage = () => {
     const router = useRouter();
     const params = useParams();
     const { id } = params;
+    const { getAuthHeaders } = useAuth();
 
     const [details, setDetails] = useState<RequestDetails | null>(null);
     const [loading, setLoading] = useState(true);
@@ -77,7 +74,7 @@ const MentorFeedbackDetailPage = () => {
             }
         };
         fetchDetails();
-    }, [id]);
+    }, [id, getAuthHeaders]);
 
     const handleSubmitFeedback = async () => {
         if (newComment.trim() === '') {

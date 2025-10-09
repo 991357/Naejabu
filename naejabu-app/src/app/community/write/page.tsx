@@ -11,7 +11,7 @@ import AlertModal from '@/components/AlertModal';
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
 const WritePostPage = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, getAuthHeaders, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -48,10 +48,7 @@ const WritePostPage = () => {
     try {
       const response = await fetch('/api/posts', {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ title, content, category }),
       });
 

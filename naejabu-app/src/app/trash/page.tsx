@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import useAuth from '@/hooks/useAuth';
 
 import Image from 'next/image';
 import AlertModal from '@/components/AlertModal';
@@ -20,6 +21,7 @@ const TrashPage = () => {
     const router = useRouter();
     const [alertModalOpen, setAlertModalOpen] = useState(false);
     const [alertModalMessage, setAlertModalMessage] = useState('');
+    const { getAuthHeaders } = useAuth();
 
     const openAlertModal = (message: string) => {
         setAlertModalMessage(message);
@@ -29,17 +31,9 @@ const TrashPage = () => {
     useEffect(() => {
         const fetchTrashedResumes = async () => {
             setIsLoading(true);
-            const token = localStorage.getItem('token');
-            if (!token) {
-                router.push('/login');
-                return;
-            }
-
             try {
                 const res = await fetch('/api/trash', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
+                    headers: getAuthHeaders(),
                 });
 
                 if (!res.ok) {
@@ -56,21 +50,13 @@ const TrashPage = () => {
         };
 
         fetchTrashedResumes();
-    }, [router]);
+    }, [getAuthHeaders]);
 
     const handleRestore = async (id: number) => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            router.push('/login');
-            return;
-        }
-
         try {
             const res = await fetch(`/api/resumes/${id}/restore`, {
                 method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
+                headers: getAuthHeaders(),
             });
 
             if (!res.ok) {

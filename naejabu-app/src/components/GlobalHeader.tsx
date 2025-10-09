@@ -8,27 +8,12 @@ import AlertModal from './AlertModal';
 import NotificationIcon from './NotificationIcon';
 
 const GlobalHeader = () => {
-  const { user, setUser, setToken } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
-  const handleLogout = async () => {
-    const token = localStorage.getItem('token');
-    try {
-      if (token) {
-        await fetch('/api/auth/logout', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
-      }
-    } catch (error) {
-      console.error('Logout failed', error);
-    } finally {
-      localStorage.removeItem('token');
-      setUser(null);
-      setToken(null);
-      router.push('/');
-    }
+  const handleLogout = () => {
+    logout();
   };
 
   const navLinks = [

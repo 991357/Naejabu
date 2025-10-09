@@ -11,7 +11,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
 const EditPostPage = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, getAuthHeaders, loading: authLoading } = useAuth();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [category, setCategory] = useState('general');
@@ -47,10 +47,7 @@ const EditPostPage = () => {
     try {
       const response = await fetch(`/api/posts/${id}`, {
         method: 'PUT',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ title, content, category }),
       });
       if (!response.ok) throw new Error('Failed to update post');

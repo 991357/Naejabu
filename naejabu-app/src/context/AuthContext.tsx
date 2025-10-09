@@ -11,6 +11,7 @@ interface User {
   email: string;
   role: string;
   is_admin: number;
+  is_temp_password?: number;
   english_name?: string;
   hanja_name?: string;
   birthdate?: string;
@@ -23,10 +24,12 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (token: string) => void;
-  logout: () => void;
+  loading: boolean;
+  login: (token: string) => Promise<void>;
+  logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
   changeNickname: (newNickname: string) => Promise<void>;
+  getAuthHeaders: () => HeadersInit;
 }
 
 // Create the context
@@ -36,27 +39,45 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const getAuthHeaders = useCallback(() => {
-    const currentToken = localStorage.getItem('token');
-    return {
+  const getAuthHeaders = useCallback((): HeadersInit => {
+    const headers: HeadersInit = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${currentToken}`,
     };
-  }, []);
+    if (token && token !== 'null') {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }, [token]);
 
-  const logout = useCallback(() => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('token');
-    router.push('/login');
-  }, [router, setUser, setToken]);
+  const logout = useCallback(async () => {
+    setLoading(true);
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+      });
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setUser(null);
+      setToken(null);
+      sessionStorage.removeItem('token');
+      setLoading(false);
+      router.push('/login');
+    }
+  }, [getAuthHeaders, router]);
 
   const fetchUser = useCallback(async () => {
-    const currentToken = localStorage.getItem('token');
-    if (!currentToken) {
-      logout();
+    setLoading(true);
+    const currentToken = sessionStorage.getItem('token');
+    if (!currentToken || currentToken === 'null') {
+      if (user || token) {
+        await logout();
+      }
+      setLoading(false);
       return;
     }
 
@@ -68,7 +89,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (response.status === 401) {
-        logout();
+        await logout();
         return;
       }
 
@@ -81,23 +102,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setToken(currentToken);
     } catch (error) {
       console.error(error);
-      logout();
+      await logout();
+    } finally {
+      setLoading(false);
     }
-  }, [logout, setUser, setToken]);
+  }, [logout, user, token]);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
+    const storedToken = sessionStorage.getItem('token');
+    if (storedToken && storedToken !== 'null') {
+      setToken(storedToken);
       fetchUser();
     } else {
-      setUser(null); // Ensure user is null if no token
+      setUser(null);
+      setToken(null);
+      setLoading(false);
     }
-  }, [fetchUser]);
+  }, []);
 
-  const login = (newToken: string) => {
-    localStorage.setItem('token', newToken);
+  const login = async (newToken: string) => {
+    setLoading(true);
+    sessionStorage.setItem('token', newToken);
     setToken(newToken);
-    fetchUser();
+    await fetchUser();
     router.push('/');
   };
 
@@ -110,7 +137,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (response.status === 401) {
-        logout();
+        await logout();
         throw new Error('Unauthorized');
       }
 
@@ -121,31 +148,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       const data = await response.json();
 
-      // If a new token is issued, update it
       if (data.token) {
-        localStorage.setItem('token', data.token);
+        sessionStorage.setItem('token', data.token);
         setToken(data.token);
       }
 
-      // Manually update user state to reflect nickname change instantly
-      if (user) {
-        setUser({ ...user, nickname: newNickname });
-      }
+      await fetchUser();
 
     } catch (error) {
       console.error('Error changing nickname:', error);
-      throw error; // Re-throw to be caught in the component
+      throw error;
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, fetchUser, changeNickname }}>
+    <AuthContext.Provider value={{ user, token, loading, login, logout, fetchUser, changeNickname, getAuthHeaders }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Custom hook to use the AuthContext
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import withAuth from '@/components/withAuth';
 import AlertModal from '@/components/AlertModal';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import useAuth from '@/hooks/useAuth';
 
 interface Resume {
   id: number;
@@ -20,14 +21,6 @@ interface Feedback {
     comment: string;
   }[];
 }
-
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-    };
-};
 
 const FeedbackDisplay = ({ feedback }: { feedback: Feedback }) => (
   <div className="mt-8 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg animate-fade-in">
@@ -64,6 +57,7 @@ const AIFeedbackPage = () => {
   const [aiFeedback, setAiFeedback] = useState<Feedback | null>(null);
   const [alertModalOpen, setAlertModalOpen] = useState(false);
   const [alertModalMessage, setAlertModalMessage] = useState('');
+  const { getAuthHeaders } = useAuth();
 
   useEffect(() => {
     const fetchResumes = async () => {
@@ -85,7 +79,7 @@ const AIFeedbackPage = () => {
       }
     };
     fetchResumes();
-  }, []);
+  }, [getAuthHeaders]);
 
   const handleSelectResume = (id: number) => {
     setSelectedResumeId(id);

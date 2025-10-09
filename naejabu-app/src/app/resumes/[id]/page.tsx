@@ -9,16 +9,9 @@ import EditResumeModal from '../../../components/EditResumeModal';
 import SpellCheckModal from '../../../components/SpellCheckModal';
 import AlertModal from '../../../components/AlertModal';
 import ResumeEditor from '../../../components/ResumeEditor'; // ReactQuill 대신 ResumeEditor를 임포트
+import useAuth from '@/hooks/useAuth';
 
 import VersionHistoryModal from '../../../components/VersionHistoryModal';
-
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-    };
-};
 
 const ResumeDetailPage = () => {
   const [resume, setResume] = useState<any>(null);
@@ -37,6 +30,7 @@ const ResumeDetailPage = () => {
   const [alertModalOpen, setAlertModalOpen] = useState(false);
   const [alertModalMessage, setAlertModalMessage] = useState('');
   const [showVersionModal, setShowVersionModal] = useState(false);
+  const { getAuthHeaders } = useAuth();
 
   const params = useParams();
   const router = useRouter();

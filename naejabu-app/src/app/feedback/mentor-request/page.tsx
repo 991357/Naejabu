@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import withAuth from '@/components/withAuth';
 import AlertModal from '@/components/AlertModal';
+import useAuth from '@/hooks/useAuth';
 
 interface Resume {
   id: number;
@@ -13,14 +14,6 @@ interface Resume {
   feedback_count: number;
 }
 
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-    };
-};
-
 const MentorRequestPage = () => {
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [selectedResumeId, setSelectedResumeId] = useState<number | null>(null);
@@ -28,6 +21,7 @@ const MentorRequestPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [alertModalOpen, setAlertModalOpen] = useState(false);
   const [alertModalMessage, setAlertModalMessage] = useState('');
+  const { getAuthHeaders } = useAuth();
 
   const fetchResumes = useCallback(async () => {
     try {
@@ -46,7 +40,7 @@ const MentorRequestPage = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [getAuthHeaders]);
 
   useEffect(() => {
     fetchResumes();

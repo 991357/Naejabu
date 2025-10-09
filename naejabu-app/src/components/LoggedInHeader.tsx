@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import NotificationIcon from './NotificationIcon';
+import useAuth from '@/hooks/useAuth';
 
 interface LoggedInHeaderProps {
     onNavigate?: (url: string) => void;
@@ -10,10 +11,10 @@ interface LoggedInHeaderProps {
 
 const LoggedInHeader: React.FC<LoggedInHeaderProps> = ({ onNavigate }) => {
   const router = useRouter();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    router.push('/login');
+    logout();
   };
 
   const handleLinkClick = (url: string) => {

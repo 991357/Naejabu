@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import Modal from '../../components/Modal';
 import CreateResumeModal from '../../components/CreateResumeModal';
@@ -10,6 +10,7 @@ import ListView from '../../components/ListView';
 import CalendarView from '../../components/CalendarView';
 import PasswordChangePopup from '../../components/PasswordChangePopup'; // Import the new popup component
 import { FaTh, FaList, FaCalendarAlt } from 'react-icons/fa';
+import useAuth from '@/hooks/useAuth';
 
 interface Resume {
   id: string;
@@ -24,21 +25,11 @@ interface User {
     is_temp_password?: number; // Add this field to the user interface
 }
 
-const getAuthHeaders = (): HeadersInit => {
-    const token = localStorage.getItem('token');
-    const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-    };
-    if (token && token !== 'null') {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-};
-
 const ResumesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [showPasswordPopup, setShowPasswordPopup] = useState(false);
+  const { user, getAuthHeaders } = useAuth();
   const [view, setView] = useState(() => {
     if (typeof window !== 'undefined') {
       const savedView = localStorage.getItem('resumeViewType');
@@ -55,7 +46,7 @@ const ResumesPage = () => {
     }
   }, [view]);
 
-  const fetchResumes = async () => {
+  const fetchResumes = useCallback(async () => {
     const response = await fetch('/api/resumes', { headers: getAuthHeaders() });
     if (response.ok) {
       const data = await response.json();
@@ -69,27 +60,14 @@ const ResumesPage = () => {
       console.error('Failed to fetch resumes:', response.statusText);
       setResumes([]);
     }
-  };
+  }, [getAuthHeaders]);
 
-  // Effect to check user status for temp password
   useEffect(() => {
-    const checkUserStatus = async () => {
-        try {
-            const response = await fetch('/api/auth/me', { headers: getAuthHeaders() });
-            if (response.ok) {
-                const userData: User = await response.json();
-                if (userData.is_temp_password === 1) {
-                    setShowPasswordPopup(true);
-                }
-            }
-        } catch (error) {
-            console.error('Failed to fetch user status', error);
-        }
-    };
-
-    checkUserStatus();
+    if (user?.is_temp_password === 1) {
+      setShowPasswordPopup(true);
+    }
     fetchResumes();
-  }, []);
+  }, [user, fetchResumes]);
 
   const handleCreateResume = async (data: { company_name: string; deadline: string; questions: string[] }) => {
     const response = await fetch('/api/resumes', {

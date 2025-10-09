@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { FaBell } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
+import useAuth from '@/hooks/useAuth';
 
 interface Notification {
   id: number;
@@ -21,18 +22,17 @@ const NotificationIcon = () => {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { getAuthHeaders } = useAuth();
 
   const fetchNotifications = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    const headers = getAuthHeaders();
+    if (!headers.Authorization) {
       return; // Do not fetch if no token
     }
 
     try {
       const res = await fetch('/api/notifications', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: headers,
       });
       if (res.ok) {
         const data = await res.json();
@@ -52,7 +52,7 @@ const NotificationIcon = () => {
     const interval = setInterval(fetchNotifications, 60000); // every minute
 
     return () => clearInterval(interval);
-  }, []);
+  }, [getAuthHeaders]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -68,15 +68,12 @@ const NotificationIcon = () => {
 
   const handleNotificationClick = async (notification: Notification) => {
     if (notification.is_read === 0) {
-      const token = localStorage.getItem('token');
-      if (!token) return;
+      const headers = getAuthHeaders();
+      if (!headers.Authorization) return;
       try {
         await fetch('/api/notifications/read', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
+          headers: headers,
           body: JSON.stringify({ notificationId: notification.id }),
         });
         fetchNotifications(); // Refresh notifications
@@ -91,14 +88,12 @@ const NotificationIcon = () => {
   };
 
   const handleReadAll = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+    const headers = getAuthHeaders();
+    if (!headers.Authorization) return;
     try {
       await fetch('/api/notifications/read-all', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: headers,
       });
       fetchNotifications(); // Refresh notifications
     } catch (error) {

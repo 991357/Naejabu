@@ -10,14 +10,6 @@ import { useTheme } from '../../context/ThemeContext';
 import RecommendationModal from '../../components/RecommendationModal';
 import Modal from '../../components/Modal';
 
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-    };
-};
-
 const hobbyMasterList = ['사진 촬영', '등산', '캠핑', '요리', '베이킹', '악기 연주', '블로그 운영', '유튜브 채널 운영', '캘리그라피', '뜨개질', '독서 토론', '영화 비평', '보드게임', '방탈출', '마라톤', '헬스', '요가', '필라테스', '자전거 타기', '수영', '배드민턴', '테니스', '볼링', '코딩', '오픈소스 기여', '외국어 학습', '재테크 공부', '식물 키우기', '목공', '가죽 공예', '여행', '맛집 탐방', '전시회 관람', '뮤지컬 관람', '봉사활동'];
 const specialtyMasterList = ['데이터 분석', '문제 해결 능력', '창의적 사고', '전략적 사고', '커뮤니케이션 스킬', '협업 능력', '리더십', '프로젝트 관리', '시간 관리 능력', '프레젠테이션 스킬', '문서 작성 능력', '정보 검색 능력', '빠른 학습 능력', '디테일 관리', '위기 대처 능력', '고객 응대 능력', '협상 능력', '외국어 구사 능력 (영어, 중국어 등)', '컴퓨터 활용 능력 (MS Office, 한컴 등)', '프로그래밍 (Python, Java, etc.)', '데이터 시각화', 'UX/UI 디자인', '콘텐츠 제작', '디지털 마케팅', 'SEO/SEM', '재무 분석'];
 
@@ -27,7 +19,7 @@ const getRandomSuggestions = (sourceArray: string[], count: number): string[] =>
 };
 
 function MyPage() {
-    const { user, changeNickname, logout, fetchUser } = useAuth();
+    const { user, changeNickname, logout, fetchUser, getAuthHeaders } = useAuth();
     const { showLoading, hideLoading } = useLoading();
     const { theme, toggleTheme } = useTheme();
 

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import withAuth from '@/components/withAuth';
 import Link from 'next/link';
 import AlertModal from '@/components/AlertModal';
+import useAuth from '@/hooks/useAuth';
 
 interface MenteeRequest {
   request_id: number;
@@ -13,15 +14,11 @@ interface MenteeRequest {
   feedback_count: number;
 }
 
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-};
-
 const FeedbackResultsPage = () => {
   const [requests, setRequests] = useState<MenteeRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { getAuthHeaders } = useAuth();
 
   const fetchRequests = useCallback(async () => {
     try {
@@ -35,7 +32,7 @@ const FeedbackResultsPage = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [getAuthHeaders]);
 
   useEffect(() => {
     fetchRequests();
